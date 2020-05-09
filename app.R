@@ -40,7 +40,11 @@ Sys.setenv(JAVA_HOME = "C:/Program Files/Java/jre1.8.0_211/")
 # setwd("D:/Dropbox/APMfull/Codes/GitHub Codes/ILKConsultancy")
 # deployApp()
 
+<<<<<<< HEAD
 pfile2 <-htmlTreeParse("test_data/2019_09_25_h091000_KAN_Garmin_2.gpx",error = function (...) {}, useInternalNodes = T)
+=======
+pfile2 <-htmlTreeParse("2019_09_25_h091000_KAN_Garmin_1.gpx",error = function (...) {}, useInternalNodes = T)
+>>>>>>> 6d47f70a966f6e73262dbbe94f9143cc6a83b3e0
 elevations <- as.numeric(xpathSApply(pfile2, path = "//trkpt/ele", xmlValue))
 times <- xpathSApply(pfile2, path = "//trkpt/time", xmlValue)
 coords <- xpathSApply(pfile2, path = "//trkpt", xmlAttrs)

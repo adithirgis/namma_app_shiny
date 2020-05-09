@@ -106,7 +106,8 @@ ui <- fluidPage(
                                    tags$hr(),
                                    helpText("Choose mobile monitoring files."),
                                    tags$hr(),
-                                   textInput("timezone", "Timezone*", value = "", width = NULL,
+                                   test <- a("Timezone* (list)", href="https://en.wikipedia.org/wiki/Time_zone"),
+                                   textInput("timezone", "", value = "", width = NULL,
                                              placeholder = "eg: UTC; Asia/Kolkata"), 
                                    tags$hr(),
                                    fileInput("file1",
@@ -1451,13 +1452,11 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 
-#   NR_LC, RHC,Ref
-# width of app
+
+
 # RH
 
-# link timezone no need (list)*
 
-# no log scale
 # names in map and downloading file
 
 

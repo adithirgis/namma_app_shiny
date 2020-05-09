@@ -81,6 +81,9 @@ ui <- fluidPage(
                                    tags$hr(),
                                    helpText("Add files based on a day's data."),
                                    tags$hr(),
+                                   textInput("timezone", "Timezone of data collection*", value = "", width = NULL,
+                                             placeholder = "eg: UTC; Asia/Kolkata"), 
+                                   tags$hr(),
                                    fileInput("file1",
                                              "Choose Garmin files",
                                              multiple = TRUE,
@@ -126,10 +129,8 @@ ui <- fluidPage(
                                                         ".txt",
                                                         "text/comma-separated-values,text/plain",
                                                         ".csv")),
-                                   
                                    tags$hr(),
-                                   textInput("timezone", "Timezone of data collection", value = "", width = NULL,
-                                             placeholder = "eg: UTC; Asia/Kolkata"), 
+                                   helpText("*mandatory"),
                                    tags$hr(),
                                    actionButton("join_button", "JOIN"),
                                    downloadButton('download',"Download as csv"),
@@ -179,10 +180,6 @@ ui <- fluidPage(
                                        dataTableOutput("table4"),
                                        h5("CPC3007 Notes/Alarms:"),
                                        dataTableOutput("table3")
-                                       # textInput("to", "To:", value="to@gmail.com"),
-                                       # textInput("sub", "Subject:", value="Subject"),
-                                       # textInput("msg","Message:", value="Type your message or concern here!"),
-                                       # actionButton("send", "Send")
                                        )
                   )
                 )
@@ -856,7 +853,7 @@ server <- function(input, output, session) {
     tmp$p1<-round(as.numeric(as.character(tmp$p1)), digits = 2)
     tmp$p25<-round(as.numeric(as.character(tmp$p25)), digits = 2)
     tmp
-    
+    tmp<-t(tmp)
   })
   
   output$table4 <- DT::renderDataTable({

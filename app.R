@@ -1061,7 +1061,11 @@ server <- function(input, output, session) {
   output$download <- downloadHandler(
     filename = function(){"joined_file.csv"},
     content = function(fname){
-      write.csv(data_joined(), fname)
+      data_joined<-data_joined()
+      data_joined<-data_joined %>%
+        dplyr::select(date,latitude,longitude, BC, BC_NR, BC_NR_LC,PM2.5,PM2.5_RHC,PM2.5_RHC_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
+      names(data_joined)<-c("date", "Latitude", "Longitude",  "BC", "BC_NR", "BC_NR_LC","PM2.5","PM2.5_RHC","PM2.5_RHC_Ref", "PM2.5_Ref", "RH", "Particle_conc",  "CO2")
+      write.csv(data_joined, fname)
     }
   )
   

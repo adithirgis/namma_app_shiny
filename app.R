@@ -1291,11 +1291,11 @@ server <- function(input, output, session) {
   output$plot2 <- renderPlotly({
     if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
       data<-data_blank()
-      data$BC<-as.numeric(data$BC)
-      data$log_BC<-log10(data$BC)
+      data$BC_LC<-as.numeric(as.character(data$BC_LC))
+      data$log_BC<-log10(data$BC_LC)
       point <- format_format(big.mark = "", decimal.mark = ",", scientific = FALSE)
       ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(log_BC)))+ geom_line(size=0.6, color="dodgerblue2")+
-                 labs(title="AE51_BC (ug/m3)",
+                 labs(title="AE51_BC_LC (ug/m3)",
                       subtitle = "Mobile Monitoring",
                       y="log10[AE51_BC (ug/m3)]",
                       x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
@@ -1304,11 +1304,11 @@ server <- function(input, output, session) {
     else if(is.null(BC_f() )) {}
     else if(!is.null(BC_f() )){
       data <- data_joined()
-      data$BC<-as.numeric(data$BC)
-      data$log_BC<-log10(data$BC)
+      data$BC_LC<-as.numeric(as.character(data$BC_LC))
+      data$log_BC<-log10(data$BC_LC)
       point <- format_format(big.mark = "", decimal.mark = ",", scientific = FALSE)
       ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(log_BC)))+ geom_line(size=0.6, color="dodgerblue2")+
-                 labs(title="AE51_BC (ug/m3)",
+                 labs(title="AE51_BC_LC (ug/m3)",
                       subtitle = "Mobile Monitoring",
                       y="log10[AE51_BC (ug/m3)]",
                       x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
@@ -1403,9 +1403,13 @@ server <- function(input, output, session) {
       }
       if(is.null(BC_f() )) {
         data_joined$BC<-NULL
+        data_joined$BC_NR<-NULL
+        data_joined$BC_LC<-NULL
       }
       if(!is.null(BC_f() )){
         data_joined$BC<-data_joined$BC
+        data_joined$BC_NR<-data_joined$BC_NR
+        data_joined$BC_LC<-data_joined$BC_LC
       }
       if(is.null(CO2_f() )) {
         data_joined$CO2<-NULL

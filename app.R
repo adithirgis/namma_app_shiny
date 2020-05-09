@@ -425,6 +425,7 @@ server <- function(input, output, session) {
       ef_file$LD25<-runquantile(ef_file$LD, 300, 0.25, type=2, endrule=c("NA"))
       ef_file$LD75<-runquantile(ef_file$LD, 300, 0.75, type=2, endrule=c("NA"))
       ef_file$BC2<-ef_file$BC1
+      ef_file$BC3<-ef_file$BC1
       ef_file$BC2[ef_file$BC2>=0]<-0
       ef_file$BC2[ef_file$BC2<0]<-1
       ef_file$BC2<-rollapply(ef_file$BC2 , FUN = mean, width = 5, align="center", partial=TRUE)
@@ -434,7 +435,7 @@ server <- function(input, output, session) {
       CEV<-data.frame(ef_file$Date, ef_file$cev1)
       CEV$ef_file.cev1[!is.na(CEV$ef_file.cev1)] <-1
       CEV<-data.frame(CEV)
-      date_file<-data.frame(ef_file$Date,  ef_file$BC2)
+      date_file<-data.frame(ef_file$Date,  ef_file$BC2, ef_file$BC3)
       completeFun <- function(data, desiredColumns) {
         completeVec <- complete.cases(data[, desiredColumns])
         return(data[completeVec, ])
@@ -474,10 +475,14 @@ server <- function(input, output, session) {
       BC$Tr=exp(-BC$ATN/100)
       BC$CF=1/(0.88*BC$Tr+0.12)
       BC$BC_Final=BC$BC_Fi*BC$CF
+      BC$BC_Fi[BC$BC_Fi<0]<-NA
+      BC$BC_Fi[is.na(BC$BC_Fi)] <- " "
       BC$BC_Final[BC$BC_Final<0]<-NA
       BC$BC_Final[is.na(BC$BC_Final)] <- " "
-      BC_Final<-dplyr::select(BC, Date, BC_Final)
-      names(BC_Final) <- c("date", "BC")
+      BC_Final<-dplyr::select(BC, Date,BC3, BC_Fi, BC_Final)
+      names(BC_Final) <- c("date", "BC", "BC_NR", "BC_LC")
+      BC_Final$BC_LC<-as.numeric(as.character(BC_Final$BC_LC))
+      BC_Final$BC_NR<-as.numeric(as.character(BC_Final$BC_NR))
       BC_Final$BC<-as.numeric(as.character(BC_Final$BC))
       BC_Final<-data.table(BC_Final)
       attributes(BC_Final$date)$tzone <- input$timezone
@@ -677,6 +682,7 @@ server <- function(input, output, session) {
       ef_file$ATN<-ef_file$ATN-(ATN)
       names(ef_file)<-c("Date", "ATN","BC")
       ef_file$BC1<-(ef_file$BC/1000)
+      ef_file$BC3<-ef_file$BC1
       BC_Final<-ef_file
       ef_file$LD<- ef_file$BC1-rollapply(ef_file$BC1 , FUN = mean, width = 30, align="center", partial=TRUE)
       ef_file$LD25<-runquantile(ef_file$LD, 300, 0.25, type=2, endrule=c("NA"))
@@ -691,7 +697,7 @@ server <- function(input, output, session) {
       CEV<-data.frame(ef_file$Date, ef_file$cev1)
       CEV$ef_file.cev1[!is.na(CEV$ef_file.cev1)] <-1
       CEV<-data.frame(CEV)
-      date_file<-data.frame(ef_file$Date,  ef_file$BC2)
+      date_file<-data.frame(ef_file$Date,  ef_file$BC2,  ef_file$BC3)
       CEV<-completeFun(CEV, c("ef_file.cev1"))
       setDT(CEV)
       setDT(date_file)
@@ -727,10 +733,13 @@ server <- function(input, output, session) {
       BC$Tr=exp(-BC$ATN/100)
       BC$CF=1/(0.88*BC$Tr+0.12)
       BC$BC_Final=BC$BC_Fi*BC$CF
+      BC$BC_Fi[BC$BC_Fi<0]<-NA
       BC$BC_Final[BC$BC_Final<0]<-NA
       BC$BC_Final[is.na(BC$BC_Final)] <- " "
-      BC_Final<-dplyr::select(BC, Date, BC_Final)
-      names(BC_Final) <- c("date", "BC")
+      BC_Final<-dplyr::select(BC, Date,BC3, BC_Fi, BC_Final)
+      names(BC_Final) <- c("date", "BC", "BC_NR", "BC_LC")
+      BC_Final$BC_LC<-as.numeric(as.character(BC_Final$BC_LC))
+      BC_Final$BC_NR<-as.numeric(as.character(BC_Final$BC_NR))
       BC_Final$BC<-as.numeric(as.character(BC_Final$BC))
       BC_Final<-data.table(BC_Final)
       attributes(BC_Final$date)$tzone <- "Asia/Kolkata"

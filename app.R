@@ -125,7 +125,7 @@ ui <- fluidPage(
                                              accept = c("text/csv",
                                                         "text/comma-separated-values,text/plain",
                                                         ".csv")),
-                                   h6("Reference Correction fro DT8530 - PM2.5"),
+                                   h5("Reference Correction for DT8530 - PM2.5"),
                                    numericInput("Slope",
                                                 "Slope",
                                                 value =1.0),
@@ -1455,24 +1455,13 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 
-# timezone*
 #   NR_LC, RHC,Ref
-# Choose mobile monitor files
-# remove choose; units 
-# refernce correction 
-# slope 
-# intercept
+# width of app
 # RH
-# (1 for no diluter)
+
 # link timezone no need (list)*
-#   *mandatory 
-# remove the x axis label
+
 # no log scale
-# time no need
-# check for any malfunction
-# Explore mobile monitorinf air pollution data
-
-
-
+# names in map and downloading file
 
 

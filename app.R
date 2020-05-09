@@ -79,7 +79,7 @@ ui <- fluidPage(
                   
                   conditionalPanel(condition = "input.tabs1==1",
                                    tags$hr(),
-                                   helpText("MAL 1 and 2 stands for Malleshwaram; KAN stands for Kannuru; CBD stands for  Central Business District"),
+                                   helpText("Add files based on a day's data."),
                                    tags$hr(),
                                    fileInput("file1",
                                              "Choose Garmin files",
@@ -111,14 +111,14 @@ ui <- fluidPage(
                                                         ".csv")),
                                    
                                    tags$hr(),
-                                   fileInput("file4", "Choose a CPC3007 -Particle Conc (#/cm3) file;",
+                                   fileInput("file4", "Choose a CPC3007 -Particle Conc (#/cm3) files;",
                                              multiple = TRUE,
                                              accept = c("text/csv",
                                                         "text/comma-separated-values,text/plain",
                                                         ".csv")),
                                    numericInput("DF",
-                                                "Dilution factor for CPC (default value is 1 for no diluter); 5.5 can be used for diluter used in Mobile Monitoring",
-                                                value =5.5),
+                                                "Dilution factor for CPC (default value is 1 for no diluter);",
+                                                value =1),
                                    tags$hr(),
                                    fileInput("file6", "Choose a LI-COR -CO2 files",
                                              multiple = TRUE,
@@ -551,16 +551,6 @@ server <- function(input, output, session) {
     setkey(RH_f, date)
     return(RH_f)
   })
-  Atmos_f<- reactive({
-    if(is.null(input$file6)){
-      return(NULL)
-    }
-    Atmos_file<-data.frame(read.csv(input$file6$datapath, header=TRUE, sep=",",skip=10, row.names=NULL))
-    # u<-stringr::str_extract(name_Atmos, "[0-9]{4}\\_[0-9]{2}\\_[0-9]{2}")
-    # w<- str_replace_all(u,"_","-")
-    # Atmos_f<-mutate(Atmos_f, date=ymd_hms(paste(w, Time), tz=input$timezone))#Atmos
-  })
-  
   file_name_CO2<- reactive({
     inFile <- input$file6
     if (is.null(inFile))
@@ -571,16 +561,7 @@ server <- function(input, output, session) {
       return(name_CO2)
     }
   })
-  file_name_Atmos<- reactive({
-    inFile <- input$file6
-    if (is.null(inFile))
-      return(NULL)
-    else{
-      x<-sub(".csv$", "", basename(input$file6$name))
-      name_Atmos<-substr(x, 1, 23)
-      return(name_Atmos)
-    }
-  })
+  
   file_name_RH<- reactive({
     inFile <- input$file5
     if (is.null(inFile))
@@ -875,6 +856,7 @@ server <- function(input, output, session) {
     tmp$p1<-round(as.numeric(as.character(tmp$p1)), digits = 2)
     tmp$p25<-round(as.numeric(as.character(tmp$p25)), digits = 2)
     tmp
+    
   })
   
   output$table4 <- DT::renderDataTable({

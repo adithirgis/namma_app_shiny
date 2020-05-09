@@ -40,6 +40,36 @@ Sys.setenv(JAVA_HOME = "C:/Program Files/Java/jre1.8.0_211/")
 # setwd("D:/Dropbox/APMfull/Codes/GitHub Codes/ILKConsultancy")
 # deployApp()
 
+pfile2 <-htmlTreeParse("test_data/2019_09_25_h091000_KAN_Garmin_2.gpx",error = function (...) {}, useInternalNodes = T)
+elevations <- as.numeric(xpathSApply(pfile2, path = "//trkpt/ele", xmlValue))
+times <- xpathSApply(pfile2, path = "//trkpt/time", xmlValue)
+coords <- xpathSApply(pfile2, path = "//trkpt", xmlAttrs)
+lats <- as.numeric(coords["lat",])
+lons <- as.numeric(coords["lon",])
+GPS_f <- data.frame(latitude = lats, longitude = lons, ele = elevations, time = times)
+
+
+CO2_f<-read.csv("2019_09_25_h091000_KAN_CO2.csv", skip=1, sep=",", header=TRUE, row.names=NULL,stringsAsFactors=FALSE)
+CO2_f<-CO2_f[,1:3]
+names(CO2_f)<-c("Date", "Time", "CO2")
+
+BC_f_header =read.csv("2019_09_25_h091000_KAN_AE12.csv", header = FALSE, sep=",", skip = 15, row.names=NULL, stringsAsFactors = FALSE)
+BC_f_header<-BC_f_header[1,]
+BC_f= read.csv("2019_09_25_h091000_KAN_AE12.csv", skip = 17, header = FALSE, sep =",")
+colnames( BC_f ) <- unlist(BC_f_header)
+
+DT_f<-read.csv("2019_09_25_h091000_KAN_DT809.csv", header=TRUE, sep=",", row.names=NULL, skip=28)
+names(DT_f)<-c("Date","Time", "PM2.5")
+
+CPC_f =read.csv("2019_09_25_h091000_KAN_CPC.csv", header=TRUE, sep=",", row.names=NULL, skip=17,stringsAsFactors=FALSE, fileEncoding="latin1")
+
+RH_f<-data.frame(read.csv("2019_09_25_h091000_KAN_RHUSB.csv", header=TRUE, sep=",",skip=6, row.names=NULL))
+RH_f_Date<-RH_f[,2]
+RH_f_Time<-RH_f[,3]
+RH<-RH_f[ , grepl( "RH" , names( RH_f ) ) ]
+RH_f<-data.frame(RH_f_Date, RH_f_Time, RH)
+names(RH_f)<-c("LogDate", "LogTime", "RH")
+
 ui <- fluidPage(
   h1("Explore Mobile Monitoring Data"),
   tags$head(
@@ -524,7 +554,7 @@ server <- function(input, output, session) {
   RH_f<- reactive({
     if(is.null(input$file5)){
       return(NULL)
-    }
+    }else{
     RH_f<-data.frame(read.csv(input$file5$datapath, header=TRUE, sep=",",skip=6, row.names=NULL))
     RH_f_Date<-RH_f[,2]
     RH_f_Time<-RH_f[,3]
@@ -546,7 +576,9 @@ server <- function(input, output, session) {
     RH_f<-data.table(RH_f)
     setkey(RH_f, date)
     return(RH_f)
+    }
   })
+  
   file_name_CO2<- reactive({
     inFile <- input$file6
     if (is.null(inFile))
@@ -557,7 +589,6 @@ server <- function(input, output, session) {
       return(name_CO2)
     }
   })
-  
   file_name_RH<- reactive({
     inFile <- input$file5
     if (is.null(inFile))
@@ -596,6 +627,212 @@ server <- function(input, output, session) {
       w<-sub(".csv$", "", basename(input$file3$name))
       name_DT<-substr(w, 1, 23)
       return(name_DT)
+    }
+  })
+  
+  data_blank<-reactive({
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      pfile2 <-htmlTreeParse("2019_09_25_h091000_KAN_Garmin_2.gpx",error = function (...) {}, useInternalNodes = T)
+      elevations <- as.numeric(xpathSApply(pfile2, path = "//trkpt/ele", xmlValue))
+      times <- xpathSApply(pfile2, path = "//trkpt/time", xmlValue)
+      coords <- xpathSApply(pfile2, path = "//trkpt", xmlAttrs)
+      lats <- as.numeric(coords["lat",])
+      lons <- as.numeric(coords["lon",])
+      GPS_f <- data.frame(latitude = lats, longitude = lons, ele = elevations, time = times)
+      GPS_f<-mutate(GPS_f, date=with_tz(ymd_hms(time), "Asia/Kolkata"))
+      GPS_f<-GPS_f[!duplicated(as.POSIXct(GPS_f$date)),]
+      GPS_f<-GPS_f %>%
+        dplyr::select(date, latitude,longitude)
+      names(GPS_f)<-c("date","latitude", "longitude")
+      GPS_f<-data.table(GPS_f)
+      setkey(GPS_f, date)
+      
+      
+      CO2_f<-read.csv("2019_09_25_h091000_KAN_CO2.csv", skip=1, sep=",", header=TRUE, row.names=NULL,stringsAsFactors=FALSE)
+      CO2_f<-CO2_f[,1:3]
+      names(CO2_f)<-c("Date", "Time", "CO2")
+      CO2_f$date<- with(CO2_f, as.POSIXct(paste(as.Date(Date, format="%d-%m-%Y"), Time), tz="Asia/Kolkata"))#"%Y-%m-%d"; "%d-%m-%Y"
+      CO2_f<-CO2_f %>%
+        dplyr::select(date, CO2)
+      names(CO2_f)<-c("date","CO2")
+      attributes(CO2_f$date)$tzone <- "Asia/Kolkata"
+      CO2_f<-data.table(CO2_f)
+      setkey(CO2_f, date)
+      
+      completeFun <- function(data, desiredColumns) {
+        completeVec <- complete.cases(data[, desiredColumns])
+        return(data[completeVec, ])
+      }
+      BC_f_header =read.csv("2019_09_25_h091000_KAN_AE12.csv", header = FALSE, sep=",", skip = 15, row.names=NULL, stringsAsFactors = FALSE)
+      BC_f_header<-BC_f_header[1,]
+      BC_f= read.csv("2019_09_25_h091000_KAN_AE12.csv", skip = 17, header = FALSE, sep =",")
+      colnames( BC_f ) <- unlist(BC_f_header)
+      BC_f<-completeFun(BC_f, c("BC"))
+      BC_f$date1<- with(BC_f, as.POSIXct(paste(as.Date(Date, format="%Y/%m/%d"), Time), tz="Asia/Kolkata"))
+      BC_f$Date<- BC_f$date1#"%Y/%m/%d", "%d-%m-%Y"
+      ef_file<-data.frame(BC_f)
+      ef_file<-ef_file[ef_file$Status==0,]
+      ef_file<-dplyr::select(ef_file, Date, ATN, BC)
+      ATN<-ef_file[1,2]
+      ef_file$ATN<-ef_file$ATN-(ATN)
+      names(ef_file)<-c("Date", "ATN","BC")
+      ef_file$BC1<-(ef_file$BC/1000)
+      BC_Final<-ef_file
+      ef_file$LD<- ef_file$BC1-rollapply(ef_file$BC1 , FUN = mean, width = 30, align="center", partial=TRUE)
+      ef_file$LD25<-runquantile(ef_file$LD, 300, 0.25, type=2, endrule=c("NA"))
+      ef_file$LD75<-runquantile(ef_file$LD, 300, 0.75, type=2, endrule=c("NA"))
+      ef_file$BC2<-ef_file$BC1
+      ef_file$BC2[ef_file$BC2>=0]<-0
+      ef_file$BC2[ef_file$BC2<0]<-1
+      ef_file$BC2<-rollapply(ef_file$BC2 , FUN = mean, width = 5, align="center", partial=TRUE)
+      Lower_LD25<-((ef_file$LD)>5*(ef_file$LD75))
+      Higher_LD75<-((ef_file$LD)< 5*(ef_file$LD25))
+      ef_file$cev1<-ifelse(Lower_LD25|Higher_LD75,ef_file$BC1,NA)
+      CEV<-data.frame(ef_file$Date, ef_file$cev1)
+      CEV$ef_file.cev1[!is.na(CEV$ef_file.cev1)] <-1
+      CEV<-data.frame(CEV)
+      date_file<-data.frame(ef_file$Date,  ef_file$BC2)
+      CEV<-completeFun(CEV, c("ef_file.cev1"))
+      setDT(CEV)
+      setDT(date_file)
+      cev_file<-date_file[CEV, on = c('ef_file.Date')]
+      cev_file<-cev_file[!(cev_file$ef_file.BC2==0),]
+      cev_file<-xts(cev_file, order.by = cev_file$ef_file.Date)
+      ef_file<-data.frame(ef_file)
+      CE<-data.frame(index(CEV))
+      i=index(cev_file)
+      i_old=index(cev_file)
+      i=index(cev_file)+1
+      j=index(cev_file)+2
+      k=index(cev_file)-2
+      l=index(cev_file)-1
+      i<-cbind(as.character(i),as.character(i_old), as.character(j), as.character(k), as.character(l))
+      Date_cev<-data.frame(i)
+      remove_cev<- data.frame(Date=unlist(Date_cev, use.names = FALSE))
+      Date_Table<-unique(remove_cev[c("Date")])
+      e=nrow(Date_Table)
+      if(e == 0){
+        BC<-ef_file
+        BC$BC_Factor<- 1
+      }else{
+        Date_Table$BC_Factor<-0
+        Date_Table$Date<-as.POSIXct(Date_Table$Date)
+        setDT(Date_Table)
+        setDT(ef_file)
+        BC<-Date_Table[ef_file, on = c('Date')]
+        BC$BC_Factor[is.na(BC$BC_Factor)] <- 1
+      }
+      BC$BC_Fi<-BC$BC_Factor*BC$BC1
+      BC$BC_Fi[BC$BC_Fi == 0] <-NA
+      BC$Tr=exp(-BC$ATN/100)
+      BC$CF=1/(0.88*BC$Tr+0.12)
+      BC$BC_Final=BC$BC_Fi*BC$CF
+      BC$BC_Final[BC$BC_Final<0]<-NA
+      BC$BC_Final[is.na(BC$BC_Final)] <- " "
+      BC_Final<-dplyr::select(BC, Date, BC_Final)
+      names(BC_Final) <- c("date", "BC")
+      BC_Final$BC<-as.numeric(as.character(BC_Final$BC))
+      BC_Final<-data.table(BC_Final)
+      attributes(BC_Final$date)$tzone <- "Asia/Kolkata"
+      setkey(BC_Final, date)
+      
+      DT_f<-read.csv("2019_09_25_h091000_KAN_DT809.csv", header=TRUE, sep=",", row.names=NULL, skip=28)
+      names(DT_f)<-c("Date","Time", "PM2.5")
+      Date1<-DT_f[1,1]
+      Date1<-as.Date(Date1,format = "%d-%m-%Y" )
+      if(is.na(Date1)){
+        Date1<-DT_f[1,1]
+        Date1<-as.Date(Date1,format = "%m/%d/%Y" )  
+      }
+      DT_f$date<- strptime(paste(Date1, DT_f$Time), format = "%Y-%m-%d %H:%M:%S") ######there are different ways: for 809 new one: %m/%d/%Y %H:%M:%S; while for 811 its %d-%m-%Y %H:%M:%S
+      DT_f$date <- as.POSIXct(DT_f$date, format='%Y-%m-%d %H:%M:%S', tz="Asia/Kolkata")
+      attributes(DT_f$date )$tzone <- "Asia/Kolkata"
+      DT_f$PM2.5<- as.numeric(as.character(DT_f$PM2.5))
+      DT_f$PM2.5<-DT_f$PM2.5*1000
+      DT_f<-dplyr::select(DT_f, date,  PM2.5 )
+      DT_f<-data.table(DT_f)
+      setkey(DT_f, date)
+      
+      
+      CPC_f =read.csv("2019_09_25_h091000_KAN_CPC.csv", header=TRUE, sep=",", row.names=NULL, skip=17,stringsAsFactors=FALSE, fileEncoding="latin1")
+      CPC_f<-CPC_f[,1:2]
+      names(CPC_f)<-c("Time", "Particle_conc")
+      CPC_f$Particle_conc<-CPC_f$Particle_conc*5.5
+      w<-as.Date("2019-09-25")
+      CPC_f<-mutate(CPC_f, date=ymd_hms(paste(w, Time), tz="Asia/Kolkata"))#CPC
+      CPC_f<-dplyr::select(CPC_f,date, Particle_conc )
+      CPC_f<-data.table(CPC_f)
+      setkey(CPC_f, date)
+      
+      
+      RH_f<-data.frame(read.csv("2019_09_25_h091000_KAN_RHUSB.csv", header=TRUE, sep=",",skip=6, row.names=NULL))
+      RH_f_Date<-RH_f[,2]
+      RH_f_Time<-RH_f[,3]
+      RH<-RH_f[ , grepl( "RH" , names( RH_f ) ) ]
+      RH_f<-data.frame(RH_f_Date, RH_f_Time, RH)
+      names(RH_f)<-c("LogDate", "LogTime", "RH")
+      RH_f$LogTime<- gsub(".", ":", RH_f$LogTime, fixed = TRUE)
+      RH_f$LogTime<- gsub("AM", "", RH_f$LogTime, fixed = TRUE)
+      RH_f$LogTime<- gsub("PM", "", RH_f$LogTime, fixed = TRUE)
+      RH_f$date<- as.POSIXct(paste(RH_f$LogDate, RH_f$LogTime), format = "%d-%m-%Y %H:%M:%S", tz = "Asia/Kolkata")#"%d-%m-%Y %I:%M:%OS %p"
+      RH_f<-RH_f%>%
+        dplyr::select(date, RH)#X2.P..RH, X1.P..RH
+      names(RH_f)<-c("date", "RH")  
+      RH_f$RH<-as.numeric(as.character(RH_f$RH))
+      RH_f$date<- as.POSIXct(RH_f$date, format='%Y-%m-%d %H:%M:%S', tz = "Asia/Kolkata")
+      RH_f$rolli<-as.numeric(RH_f$date)
+      RH_f<-data.table(RH_f)
+      setkey(RH_f, date)
+      VecFunc <- function(x) {
+        if (x > 0.6) {
+          return (1+(0.25*(((x)*(x))/(1-x))))
+        } else
+        {
+          return (1)
+        }
+      }
+      joined_GPS_CO2<-left_join(GPS_f, CO2_f, by="date")
+      joined_GPS_CO2<-dplyr::select(joined_GPS_CO2, date, CO2, latitude, longitude )
+      joined_GPS_CO2<-data.table(joined_GPS_CO2)
+      setkey(joined_GPS_CO2, date)
+      joined_GPS_DT<-left_join(GPS_f, DT_f, by="date")
+      joined_GPS_DT$PM2.5_Corr<-NA
+      joined_GPS_DT<-dplyr::select(joined_GPS_DT, date, PM2.5, PM2.5_Corr,latitude, longitude )
+      joined_GPS_DT<-data.table(joined_GPS_DT)
+      setkey(joined_GPS_DT, date)
+      DT_f<-RH_f[joined_GPS_DT, roll = "nearest"]
+      DT_f$RH<-DT_f$RH/100
+      DT_f<-dplyr::select(DT_f, date,latitude, longitude,  PM2.5, RH )
+      names(DT_f) <- c("date","latitude", "longitude",  "PM2.5", "RH")
+      DT_f$CF<-sapply(DT_f$RH, FUN = VecFunc)
+      DT_f$PM2.5_Corr<-DT_f$PM2.5/DT_f$CF
+      DT_f$PM2.5_Ref<-(DT_f$PM2.5*1)+0
+      DT_f$PM2.5_Corr_Ref<-(DT_f$PM2.5_Corr*1)+0
+      DT_f$date <- as.POSIXct(DT_f$date, format='%Y-%m-%d %H:%M:%S')
+      attributes(DT_f$date )$tzone <-"Asia/Kolkata"
+      DT_f<-data.table(DT_f)
+      setkey(DT_f, date)
+      joined_GPS_BC<-left_join(GPS_f, BC_Final, by="date")
+      joined_GPS_BC<-dplyr::select(joined_GPS_BC, date, BC, latitude, longitude )
+      joined_GPS_BC<-data.table(joined_GPS_BC)
+      setkey(joined_GPS_BC, date)
+      joined_GPS_CPC<-left_join(GPS_f, CPC_f, by="date")
+      joined_GPS_CPC<-dplyr::select(joined_GPS_CPC, date, Particle_conc, latitude, longitude )
+      joined_GPS_CPC<-data.table(joined_GPS_CPC)
+      setkey(joined_GPS_CPC, date)
+      joined2<-left_join(joined_GPS_CPC, joined_GPS_CO2, by="date")
+      setDT(joined2)
+      setkey(joined2, date)
+      joined_1<-left_join(DT_f, joined2, by="date")
+      setDT(joined_1)
+      setkey(joined_1, date)
+      joined<-joined_1[joined_GPS_BC, roll="nearest"]
+      joined<-joined %>%
+        dplyr::select(date,latitude,longitude, BC,PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
+      names(joined)<-c("date", "Latitude", "Longitude",  "BC","PM2.5","PM2.5_Corr","PM2.5_Corr_Ref", "PM2.5_Ref", "RH", "Particle_conc",  "CO2")
+      attributes(joined$date )$tzone <- "Asia/Kolkata"
+      joined<-joined[!duplicated(joined$date), ]
+      joined
     }
   })
   
@@ -787,7 +1024,11 @@ server <- function(input, output, session) {
   })
   
   output$table1<- DT::renderDataTable({
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      data_joined<-data_blank()
+      }else{
     data_joined<-data_joined()
+      }
     data_joined$BC<-round(as.numeric(data_joined$BC), digits = 2)
     data_joined$PM2.5<-round(as.numeric(data_joined$PM2.5), digits = 2)
     data_joined$PM2.5_Corr<-round(as.numeric(data_joined$PM2.5_Corr), digits = 2)
@@ -813,7 +1054,12 @@ server <- function(input, output, session) {
   )
   
   output$table<- DT::renderDataTable({
-    data<-data_joined()
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      data<-data_blank()
+    }else{
+      data<-data_joined()
+    }
+    
     data<-dplyr::select(data, BC,  PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref,RH, Particle_conc,  CO2)
     data[["BC"]]<-as.numeric(as.character(data[["BC"]]))
     data$RH<-data$RH*100
@@ -853,7 +1099,13 @@ server <- function(input, output, session) {
   
   output$table4 <- DT::renderDataTable({
     inFile<-input$file3
-    if(is.null(DT_f() )) {}
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      DT_f<-read.csv("2019_09_25_h091000_KAN_DT809.csv", header=FALSE, sep=",", row.names=NULL, skip=2)
+      DT_f<-DT_f[1:11,]
+      DT_f<-DT_f[,1:2]
+      DT_f 
+    }
+    else if(is.null(DT_f() )) {}
     else{
       files3 = lapply(inFile$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=",", row.names=NULL, skip=2)
@@ -869,7 +1121,14 @@ server <- function(input, output, session) {
   })
   output$table3<- DT::renderDataTable({
     inFile<-input$file4
-    if(is.null(CPC_f() )) {}
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      CPC_f<-read.csv("2019_09_25_h091000_KAN_CPC.csv", header=FALSE, sep=",", row.names=NULL, skip=1)
+      names(CPC_f)<-c("Setting", "Value")
+      CPC_f<-CPC_f[1:13,]
+      CPC_f<-CPC_f[,1:2]
+      CPC_f 
+    }
+    else if(is.null(CPC_f() )) {}
     else{
       files3 = lapply(inFile$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=",", row.names=NULL, skip=1)
@@ -907,8 +1166,14 @@ server <- function(input, output, session) {
   })
   output$table5 <-DT::renderDataTable({
     inFile<-input$file2
-    if(is.null(BC_f() )) {"No AE51 filesavailable"}
-    if(!is.null(BC_f() )){
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      BC_f<-read.csv("2019_09_25_h091000_KAN_AE12.csv", header=FALSE, sep=" ", skip = 1, row.names=NULL)
+      BC_f<-BC_f[1:14, ]
+      names(BC_f)<-c("Setting")
+      BC_f
+    }
+    else if(is.null(BC_f() )) {"No AE51 files available"}
+    else if(!is.null(BC_f() )){
       files3 = lapply(inFile$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=" ", skip = 1, row.names=NULL)
         JSON_csv<-JSON_csv[1:14, ]
@@ -922,8 +1187,16 @@ server <- function(input, output, session) {
   })
   
   output$plot5 <- renderPlotly({
-    if(is.null(GPS_f() )) {}
-    if(!is.null(GPS_f() )){
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      data<-data_blank()
+      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(Latitude)))+ geom_line(size=0.6, color="dodgerblue2")+
+                 labs(title="Latitude (degree)",
+                      y="Latitude",
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
+               
+      )}
+    else if(is.null(GPS_f() )) {}
+    else if(!is.null(GPS_f() )){
       data <- data_joined()
       ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(Latitude)))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="Latitude (degree)",
@@ -933,22 +1206,37 @@ server <- function(input, output, session) {
       )}
   })
   output$plot6 <- renderPlotly({
-    if(is.null(GPS_f() )) {}
-    if(!is.null(GPS_f() )){
-      data <- data_joined()
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      data<-data_blank()
       ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(Longitude)))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="Longitude (degree)",
                       y="Longitude",
                       x="Time")+scale_x_datetime( date_labels = "%H:%M")+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
       )}
+    else if(is.null(GPS_f() )) {}
+    else if(!is.null(GPS_f() )){
+      data <- data_joined()
+      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(Longitude)))+ geom_line(size=0.6, color="dodgerblue2")+
+                 labs(title="Longitude (degree)",
+                      y="Longitude",
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
+       )}
   })
-  
-  
-  
   output$plot <- renderPlotly({
-    if(is.null(DT_f() )) {}
-    if(!is.null(DT_f() )){
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      data<-data_blank()
+      data$PM2.5<-as.numeric(data$PM2.5)
+      data$log_PM2.5<-log10(data$PM2.5)
+      point <- format_format(big.mark = "", decimal.mark = ",", scientific = FALSE)
+      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(log_PM2.5)))+ geom_line(size=0.6, color="dodgerblue2")+
+                 labs(title="DT8530_PM2.5 (ug/m3)",
+                      y="log10[DT8530_PM2.5 (ug/m3)]",
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
+               
+      )}
+    else if(is.null(DT_f() )) {}
+    else if(!is.null(DT_f() )){
       data <- data_joined()
       data$PM2.5<-as.numeric(data$PM2.5)
       data$log_PM2.5<-log10(data$PM2.5)
@@ -961,8 +1249,18 @@ server <- function(input, output, session) {
       )}
   })
   output$plot4<- renderPlotly({
-    if(is.null(RH_f() )) {}
-    if(!is.null(RH_f() )){
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      data<-data_blank()
+      data$RH<-data$RH*100
+      point <- format_format(big.mark = "", decimal.mark = ",", scientific = FALSE)
+      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(RH)))+ geom_line(size=0.6, color="dodgerblue2")+
+                 labs(title="Relative Humidity (%)",
+                      y="Relative Humidity(%)",
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous(limits = c(20,100))+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
+               
+      )}
+    else if(is.null(RH_f() )) {}
+    else if(!is.null(RH_f() )){
       data <- data_joined()
       data$RH<-data$RH*100
       point <- format_format(big.mark = "", decimal.mark = ",", scientific = FALSE)
@@ -974,8 +1272,20 @@ server <- function(input, output, session) {
       )}
   })
   output$plot2 <- renderPlotly({
-    if(is.null(BC_f() )) {}
-    if(!is.null(BC_f() )){
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      data<-data_blank()
+      data$BC<-as.numeric(data$BC)
+      data$log_BC<-log10(data$BC)
+      point <- format_format(big.mark = "", decimal.mark = ",", scientific = FALSE)
+      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(log_BC)))+ geom_line(size=0.6, color="dodgerblue2")+
+                 labs(title="AE51_BC (ug/m3)",
+                      subtitle = "Mobile Monitoring",
+                      y="log10[AE51_BC (ug/m3)]",
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
+               
+      )}
+    else if(is.null(BC_f() )) {}
+    else if(!is.null(BC_f() )){
       data <- data_joined()
       data$BC<-as.numeric(data$BC)
       data$log_BC<-log10(data$BC)
@@ -989,8 +1299,19 @@ server <- function(input, output, session) {
       )}
   })
   output$plot3 <- renderPlotly({
-    if(is.null(CPC_f() )) {}
-    if(!is.null(CPC_f() )){
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      data<-data_blank()
+      data$Particle_conc<-as.numeric(data$Particle_conc)
+      data$log_Particle_conc<-log10(data$Particle_conc)
+      ggplotly(ggplot(data, aes(as.POSIXct(date), log_Particle_conc))+ geom_line(size=0.6, color="dodgerblue2")+
+                 labs(title="CPC3007_Particle Conc (#/cm3)",
+                      subtitle = "Mobile Monitoring",
+                      y="log10[CPC_Particle Conc (#/cm3)]",
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
+               
+      )}
+    else if(is.null(CPC_f() )) {}
+    else if(!is.null(CPC_f() )){
       data <- data_joined()
       data$Particle_conc<-as.numeric(data$Particle_conc)
       data$log_Particle_conc<-log10(data$Particle_conc)
@@ -1000,12 +1321,20 @@ server <- function(input, output, session) {
                       y="log10[CPC_Particle Conc (#/cm3)]",
                       x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
-      )
-    }
+      ) }
   })
   output$plot7 <- renderPlotly({
-    if(is.null(CO2_f() )) {}
-    if(!is.null(CO2_f() )){
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      data<-data_blank()
+      ggplotly(ggplot(data, aes(as.POSIXct(date), CO2))+ geom_line(size=0.6, color="dodgerblue2")+
+                 labs(title="LI-COR_CO2",
+                      subtitle = "Mobile Monitoring",
+                      y="LI-COR_CO2",
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_log10(labels =scales::comma_format(digits = 0))+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
+               
+      )}
+    else if(is.null(CO2_f() )) {}
+    else if(!is.null(CO2_f() )){
       data <- data_joined()
       ggplotly(ggplot(data, aes(as.POSIXct(date), CO2))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="LI-COR_CO2",
@@ -1013,11 +1342,19 @@ server <- function(input, output, session) {
                       y="LI-COR_CO2",
                       x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_log10(labels =scales::comma_format(digits = 0))+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
-      )
-    }
+      )}
   })
   
   observe({
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      data_joined<-data_blank()
+      data_joined$date<-NULL
+      data_joined$Latitude<-NULL
+      data_joined$Longitude<-NULL
+      data_joined$PM2.5_Corr<-NULL
+      data_joined$PM2.5_Corr_Ref<-NULL
+      }
+    else{
     data_joined<-data_joined()
     data_joined$date<-NULL
     data_joined$Latitude<-NULL
@@ -1059,11 +1396,17 @@ server <- function(input, output, session) {
     if(!is.null(CO2_f() )){
       data_joined$CO2<-data_joined$CO2
     }
+  }
     updateSelectInput(session, "palleInp", choices = names(data_joined))
   })
   
   output$map <- renderLeaflet({
+    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+      data<-data_blank()
+      }
+    else{
     data<-data_joined()
+    }
     data$RH<-data$RH*100
     if (input$palleInp == "BC") {
       risk.bins =c(0,0.5, 2, 5, 10, 20, 40,100, 500,2000,10000)

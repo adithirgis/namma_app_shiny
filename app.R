@@ -40,6 +40,36 @@ Sys.setenv(JAVA_HOME = "C:/Program Files/Java/jre1.8.0_211/")
 # setwd("D:/Dropbox/APMfull/Codes/GitHub Codes/ILKConsultancy")
 # deployApp()
 
+pfile2 <-htmlTreeParse("2019_09_25_h091000_KAN_Garmin_1.gpx",error = function (...) {}, useInternalNodes = T)
+elevations <- as.numeric(xpathSApply(pfile2, path = "//trkpt/ele", xmlValue))
+times <- xpathSApply(pfile2, path = "//trkpt/time", xmlValue)
+coords <- xpathSApply(pfile2, path = "//trkpt", xmlAttrs)
+lats <- as.numeric(coords["lat",])
+lons <- as.numeric(coords["lon",])
+GPS_f <- data.frame(latitude = lats, longitude = lons, ele = elevations, time = times)
+
+
+CO2_f<-read.csv("2019_09_25_h091000_KAN_CO2.csv", skip=1, sep=",", header=TRUE, row.names=NULL,stringsAsFactors=FALSE)
+CO2_f<-CO2_f[,1:3]
+names(CO2_f)<-c("Date", "Time", "CO2")
+
+BC_f_header =read.csv("2019_09_25_h091000_KAN_AE12.csv", header = FALSE, sep=",", skip = 15, row.names=NULL, stringsAsFactors = FALSE)
+BC_f_header<-BC_f_header[1,]
+BC_f= read.csv("2019_09_25_h091000_KAN_AE12.csv", skip = 17, header = FALSE, sep =",")
+colnames( BC_f ) <- unlist(BC_f_header)
+
+DT_f<-read.csv("2019_09_25_h091000_KAN_DT809.csv", header=TRUE, sep=",", row.names=NULL, skip=28)
+names(DT_f)<-c("Date","Time", "PM2.5")
+
+CPC_f =read.csv("2019_09_25_h091000_KAN_CPC.csv", header=TRUE, sep=",", row.names=NULL, skip=17,stringsAsFactors=FALSE, fileEncoding="latin1")
+
+RH_f<-data.frame(read.csv("2019_09_25_h091000_KAN_RHUSB.csv", header=TRUE, sep=",",skip=6, row.names=NULL))
+RH_f_Date<-RH_f[,2]
+RH_f_Time<-RH_f[,3]
+RH<-RH_f[ , grepl( "RH" , names( RH_f ) ) ]
+RH_f<-data.frame(RH_f_Date, RH_f_Time, RH)
+names(RH_f)<-c("LogDate", "LogTime", "RH")
+
 ui <- fluidPage(
   h1("Explore Mobile Monitoring Data"),
   tags$head(
@@ -524,7 +554,7 @@ server <- function(input, output, session) {
   RH_f<- reactive({
     if(is.null(input$file5)){
       return(NULL)
-    }
+    }else{
     RH_f<-data.frame(read.csv(input$file5$datapath, header=TRUE, sep=",",skip=6, row.names=NULL))
     RH_f_Date<-RH_f[,2]
     RH_f_Time<-RH_f[,3]
@@ -546,6 +576,7 @@ server <- function(input, output, session) {
     RH_f<-data.table(RH_f)
     setkey(RH_f, date)
     return(RH_f)
+    }
   })
   file_name_CO2<- reactive({
     inFile <- input$file6

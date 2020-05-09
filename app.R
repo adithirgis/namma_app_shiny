@@ -425,6 +425,7 @@ server <- function(input, output, session) {
       ef_file$LD25<-runquantile(ef_file$LD, 300, 0.25, type=2, endrule=c("NA"))
       ef_file$LD75<-runquantile(ef_file$LD, 300, 0.75, type=2, endrule=c("NA"))
       ef_file$BC2<-ef_file$BC1
+      ef_file$BC3<-ef_file$BC1
       ef_file$BC2[ef_file$BC2>=0]<-0
       ef_file$BC2[ef_file$BC2<0]<-1
       ef_file$BC2<-rollapply(ef_file$BC2 , FUN = mean, width = 5, align="center", partial=TRUE)
@@ -434,7 +435,7 @@ server <- function(input, output, session) {
       CEV<-data.frame(ef_file$Date, ef_file$cev1)
       CEV$ef_file.cev1[!is.na(CEV$ef_file.cev1)] <-1
       CEV<-data.frame(CEV)
-      date_file<-data.frame(ef_file$Date,  ef_file$BC2)
+      date_file<-data.frame(ef_file$Date,  ef_file$BC2, ef_file$BC3)
       completeFun <- function(data, desiredColumns) {
         completeVec <- complete.cases(data[, desiredColumns])
         return(data[completeVec, ])
@@ -474,10 +475,14 @@ server <- function(input, output, session) {
       BC$Tr=exp(-BC$ATN/100)
       BC$CF=1/(0.88*BC$Tr+0.12)
       BC$BC_Final=BC$BC_Fi*BC$CF
+      BC$BC_Fi[BC$BC_Fi<0]<-NA
+      BC$BC_Fi[is.na(BC$BC_Fi)] <- " "
       BC$BC_Final[BC$BC_Final<0]<-NA
       BC$BC_Final[is.na(BC$BC_Final)] <- " "
-      BC_Final<-dplyr::select(BC, Date, BC_Final)
-      names(BC_Final) <- c("date", "BC")
+      BC_Final<-dplyr::select(BC, Date,BC3, BC_Fi, BC_Final)
+      names(BC_Final) <- c("date", "BC", "BC_NR", "BC_LC")
+      BC_Final$BC_LC<-as.numeric(as.character(BC_Final$BC_LC))
+      BC_Final$BC_NR<-as.numeric(as.character(BC_Final$BC_NR))
       BC_Final$BC<-as.numeric(as.character(BC_Final$BC))
       BC_Final<-data.table(BC_Final)
       attributes(BC_Final$date)$tzone <- input$timezone
@@ -677,6 +682,7 @@ server <- function(input, output, session) {
       ef_file$ATN<-ef_file$ATN-(ATN)
       names(ef_file)<-c("Date", "ATN","BC")
       ef_file$BC1<-(ef_file$BC/1000)
+      ef_file$BC3<-ef_file$BC1
       BC_Final<-ef_file
       ef_file$LD<- ef_file$BC1-rollapply(ef_file$BC1 , FUN = mean, width = 30, align="center", partial=TRUE)
       ef_file$LD25<-runquantile(ef_file$LD, 300, 0.25, type=2, endrule=c("NA"))
@@ -691,7 +697,7 @@ server <- function(input, output, session) {
       CEV<-data.frame(ef_file$Date, ef_file$cev1)
       CEV$ef_file.cev1[!is.na(CEV$ef_file.cev1)] <-1
       CEV<-data.frame(CEV)
-      date_file<-data.frame(ef_file$Date,  ef_file$BC2)
+      date_file<-data.frame(ef_file$Date,  ef_file$BC2,  ef_file$BC3)
       CEV<-completeFun(CEV, c("ef_file.cev1"))
       setDT(CEV)
       setDT(date_file)
@@ -727,10 +733,13 @@ server <- function(input, output, session) {
       BC$Tr=exp(-BC$ATN/100)
       BC$CF=1/(0.88*BC$Tr+0.12)
       BC$BC_Final=BC$BC_Fi*BC$CF
+      BC$BC_Fi[BC$BC_Fi<0]<-NA
       BC$BC_Final[BC$BC_Final<0]<-NA
       BC$BC_Final[is.na(BC$BC_Final)] <- " "
-      BC_Final<-dplyr::select(BC, Date, BC_Final)
-      names(BC_Final) <- c("date", "BC")
+      BC_Final<-dplyr::select(BC, Date,BC3, BC_Fi, BC_Final)
+      names(BC_Final) <- c("date", "BC", "BC_NR", "BC_LC")
+      BC_Final$BC_LC<-as.numeric(as.character(BC_Final$BC_LC))
+      BC_Final$BC_NR<-as.numeric(as.character(BC_Final$BC_NR))
       BC_Final$BC<-as.numeric(as.character(BC_Final$BC))
       BC_Final<-data.table(BC_Final)
       attributes(BC_Final$date)$tzone <- "Asia/Kolkata"
@@ -813,7 +822,7 @@ server <- function(input, output, session) {
       DT_f<-data.table(DT_f)
       setkey(DT_f, date)
       joined_GPS_BC<-left_join(GPS_f, BC_Final, by="date")
-      joined_GPS_BC<-dplyr::select(joined_GPS_BC, date, BC, latitude, longitude )
+      joined_GPS_BC<-dplyr::select(joined_GPS_BC, date, BC, BC_NR, BC_LC, latitude, longitude )
       joined_GPS_BC<-data.table(joined_GPS_BC)
       setkey(joined_GPS_BC, date)
       joined_GPS_CPC<-left_join(GPS_f, CPC_f, by="date")
@@ -828,8 +837,8 @@ server <- function(input, output, session) {
       setkey(joined_1, date)
       joined<-joined_1[joined_GPS_BC, roll="nearest"]
       joined<-joined %>%
-        dplyr::select(date,latitude,longitude, BC,PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
-      names(joined)<-c("date", "Latitude", "Longitude",  "BC","PM2.5","PM2.5_Corr","PM2.5_Corr_Ref", "PM2.5_Ref", "RH", "Particle_conc",  "CO2")
+        dplyr::select(date,latitude,longitude, BC, BC_NR, BC_LC,PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
+      names(joined)<-c("date", "Latitude", "Longitude",  "BC", "BC_NR", "BC_LC","PM2.5","PM2.5_Corr","PM2.5_Corr_Ref", "PM2.5_Ref", "RH", "Particle_conc",  "CO2")
       attributes(joined$date )$tzone <- "Asia/Kolkata"
       joined<-joined[!duplicated(joined$date), ]
       joined
@@ -945,7 +954,11 @@ server <- function(input, output, session) {
     {
       joined_GPS_BC<-dplyr::select(GPS_f, date,  latitude, longitude)
       joined_GPS_BC$BC<-NA
-      joined_GPS_BC$BC<-as.numeric(joined_GPS_BC$BC)
+      joined_GPS_BC$BC_NR<-NA
+      joined_GPS_BC$BC_LC<-NA
+      joined_GPS_BC$BC<-as.numeric(as.character(joined_GPS_BC$BC))
+      joined_GPS_BC$BC_NR<-as.numeric(as.character(joined_GPS_BC$BC_NR))
+      joined_GPS_BC$BC_LC<-as.numeric(as.character(joined_GPS_BC$BC_LC))
     }
     if (!is.null(BC_f())){
       validate(
@@ -955,7 +968,7 @@ server <- function(input, output, session) {
         need(try(GPS_f_date()==BC_f_date()), "The files have different date entries in GPS and AE51! Please check once again.")
       )
       joined_GPS_BC<-left_join(GPS_f, BC_Final, by="date")
-      joined_GPS_BC<-dplyr::select(joined_GPS_BC, date, BC, latitude, longitude )
+      joined_GPS_BC<-dplyr::select(joined_GPS_BC, date,  BC, BC_NR, BC_LC, latitude, longitude )
     }
     joined_GPS_BC<-data.table(joined_GPS_BC)
     setkey(joined_GPS_BC, date)
@@ -1016,8 +1029,8 @@ server <- function(input, output, session) {
     setkey(joined_1, date)
     joined<-joined_1[joined_GPS_BC, roll="nearest"]
     joined<-joined %>%
-      dplyr::select(date,latitude,longitude, BC,PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
-    names(joined)<-c("date", "Latitude", "Longitude",  "BC","PM2.5","PM2.5_Corr","PM2.5_Corr_Ref", "PM2.5_Ref", "RH", "Particle_conc",  "CO2")
+      dplyr::select(date,latitude,longitude, BC, BC_NR, BC_LC,PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
+    names(joined)<-c("date", "Latitude", "Longitude",  "BC", "BC_NR", "BC_LC","PM2.5","PM2.5_Corr","PM2.5_Corr_Ref", "PM2.5_Ref", "RH", "Particle_conc",  "CO2")
     attributes(joined$date )$tzone <- input$timezone
     joined<-joined[!duplicated(joined$date), ]
     return(joined)
@@ -1030,6 +1043,8 @@ server <- function(input, output, session) {
       data_joined<-data_joined()
     }
     data_joined$BC<-round(as.numeric(data_joined$BC), digits = 2)
+    data_joined$BC_NR<-round(as.numeric(data_joined$BC_NR), digits = 2)
+    data_joined$BC_LC<-round(as.numeric(data_joined$BC_LC), digits = 2)
     data_joined$PM2.5<-round(as.numeric(data_joined$PM2.5), digits = 2)
     data_joined$PM2.5_Corr<-round(as.numeric(data_joined$PM2.5_Corr), digits = 2)
     data_joined$PM2.5_Ref<-round(as.numeric(data_joined$PM2.5_Ref), digits = 2)
@@ -1041,8 +1056,8 @@ server <- function(input, output, session) {
     data_joined$RH<-data_joined$RH*100
     data_joined$RH<-round(as.numeric(data_joined$RH), digits = 2)
     data_joined<-data_joined %>%
-      dplyr::select(date,Latitude,Longitude, BC, PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
-    names(data_joined)<-c("date", "Latitude", "Longitude",  "AE51_BC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_Corr (ug/m3)","DT8530_PM2.5_Corr_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
+      dplyr::select(date,Latitude,Longitude, BC,BC_NR,BC_LC, PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
+    names(data_joined)<-c("date", "Latitude", "Longitude",  "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_Corr (ug/m3)","DT8530_PM2.5_Corr_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
     data_joined
   })
   
@@ -1060,11 +1075,13 @@ server <- function(input, output, session) {
       data<-data_joined()
     }
     
-    data<-dplyr::select(data, BC,  PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref,RH, Particle_conc,  CO2)
+    data<-dplyr::select(data, BC,BC_NR,BC_LC,  PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref,RH, Particle_conc,  CO2)
     data[["BC"]]<-as.numeric(as.character(data[["BC"]]))
+    data[["BC_NR"]]<-as.numeric(as.character(data[["BC_NR"]]))
+    data[["BC_LC"]]<-as.numeric(as.character(data[["BC_LC"]]))
     data$RH<-data$RH*100
-    names(data)<-c("AE51_BC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_Corr (ug/m3)","DT8530_PM2.5_Corr_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
-    columns <-c("AE51_BC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_Corr (ug/m3)","DT8530_PM2.5_Corr_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)",  "CPC3007_Particle Conc (#/cm3)", "LI-COR_CO2")
+    names(data)<-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_Corr (ug/m3)","DT8530_PM2.5_Corr_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
+    columns <-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_Corr (ug/m3)","DT8530_PM2.5_Corr_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)",  "CPC3007_Particle Conc (#/cm3)", "LI-COR_CO2")
     data[, columns] <- lapply(columns, function(x) as.numeric(as.character(data[[x]])))
     tmp1 <- do.call(data.frame,
                     list(Mean = apply(data, 2, mean,na.rm=TRUE),

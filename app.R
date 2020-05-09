@@ -71,7 +71,7 @@ RH_f<-data.frame(RH_f_Date, RH_f_Time, RH)
 names(RH_f)<-c("LogDate", "LogTime", "RH")
 
 ui <- fluidPage(
-  h1("Explore Mobile Monitoring Data"),
+  h1("Explore Mobile Monitoring Air Pollution Data"),
   tags$head(
     tags$style(HTML("
                     .sidebar { height: 10vh; overflow-y: auto; font-size: 14px;}
@@ -81,17 +81,12 @@ ui <- fluidPage(
                     color: red;font-size: 14px;
                     }
                     "
-    )
-    )
-  ),
-  
-  
-  
+    )) ),
   sidebarLayout(position = "left",
                 sidebarPanel(
                   conditionalPanel(condition = "input.tabs1==6",
                                    tags$hr(),
-                                   h4("Alarms! Check the concerned instruments!"),
+                                   h4("Alarms! Check for any malfunction."),
                                    tags$hr()),
                   conditionalPanel(condition = "input.tabs1==4",
                                    tags$hr(),
@@ -109,57 +104,57 @@ ui <- fluidPage(
                   
                   conditionalPanel(condition = "input.tabs1==1",
                                    tags$hr(),
-                                   helpText("Add mobile monitoring files of a day."),
+                                   helpText("Choose mobile monitoring files."),
                                    tags$hr(),
-                                   textInput("timezone", "Timezone at which pollutant data was collected (Local Time)*", value = "", width = NULL,
+                                   textInput("timezone", "Timezone*", value = "", width = NULL,
                                              placeholder = "eg: UTC; Asia/Kolkata"), 
                                    tags$hr(),
                                    fileInput("file1",
-                                             "Choose Garmin files",
+                                             "Garmin files",
                                              multiple = TRUE,
                                              accept=c('.gpx')),
                                    tags$hr(),
-                                   fileInput("file2", "Choose a AE51 -BC (ug/m3) files",
+                                   fileInput("file2", "AE51 - BC files",
                                              multiple = TRUE,
                                              accept = c("text/csv",
                                                         "text/comma-separated-values,text/plain",
                                                         ".csv")),
                                    tags$hr(),
-                                   fileInput("file3", "Choose a DT8530 -PM2.5 (ug/m3) files",
+                                   fileInput("file3", "DT8530 - PM2.5 files",
                                              multiple = TRUE,
                                              accept = c("text/csv",
                                                         "text/comma-separated-values,text/plain",
                                                         ".csv")),
                                    numericInput("Slope",
-                                                "Slope for reference grade correction for DustTrak data",
+                                                "Slope",
                                                 value =1.0),
                                    numericInput("Intercept",
-                                                "Intercept for reference grade correction for DustTrak data",
+                                                "Intercept",
                                                 value =0),
                                    tags$hr(),
-                                   fileInput("file5", "Choose a RH (relative humidity) meter files",
+                                   fileInput("file5", "RH files",
                                              multiple = TRUE,
                                              accept = c("text/csv",
                                                         "text/comma-separated-values,text/plain",
                                                         ".csv")),
                                    
                                    tags$hr(),
-                                   fileInput("file4", "Choose a CPC3007 -Particle Conc (#/cm3) files;",
+                                   fileInput("file4", "CPC3007 -Particle Conc files;",
                                              multiple = TRUE,
                                              accept = c("text/csv",
                                                         "text/comma-separated-values,text/plain",
                                                         ".csv")),
                                    numericInput("DF",
-                                                "Dilution factor for CPC (default value is 1 for no diluter);",
+                                                "Dilution factor for CPC (1 for no diluter);",
                                                 value =1),
                                    tags$hr(),
-                                   fileInput("file6", "Choose a LI-COR -CO2 files",
+                                   fileInput("file6", "LI-COR - CO2 files",
                                              multiple = TRUE,
                                              accept = c("text/csv",
                                                         ".txt",
                                                         "text/comma-separated-values,text/plain",
                                                         ".csv")),
-                                   helpText("*mandatory; check for correct timzone"),
+                                   helpText("*mandatory"),
                                    tags$hr(),
                                    actionButton("join_button", "JOIN"),
                                    downloadButton('download',"Download as csv"),
@@ -1458,3 +1453,25 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+
+# timezone*
+#   NR_LC, RHC,Ref
+# Choose mobile monitor files
+# remove choose; units 
+# refernce correction 
+# slope 
+# intercept
+# RH
+# (1 for no diluter)
+# link timezone no need (list)*
+#   *mandatory 
+# remove the x axis label
+# no log scale
+# time no need
+# check for any malfunction
+# Explore mobile monitorinf air pollution data
+
+
+
+
+

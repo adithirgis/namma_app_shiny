@@ -40,7 +40,7 @@ Sys.setenv(JAVA_HOME = "C:/Program Files/Java/jre1.8.0_211/")
 # setwd("D:/Dropbox/APMfull/Codes/GitHub Codes/ILKConsultancy")
 # deployApp()
 
-pfile2 <-htmlTreeParse("test_data/2019_09_25_h091000_KAN_Garmin_2.gpx",error = function (...) {}, useInternalNodes = T)
+pfile2 <-htmlTreeParse("test_data/2019_09_25_h091000_KAN_Garmin_3.gpx",error = function (...) {}, useInternalNodes = T)
 elevations <- as.numeric(xpathSApply(pfile2, path = "//trkpt/ele", xmlValue))
 times <- xpathSApply(pfile2, path = "//trkpt/time", xmlValue)
 coords <- xpathSApply(pfile2, path = "//trkpt", xmlAttrs)
@@ -74,7 +74,7 @@ ui <- fluidPage(
   h1("Explore Mobile Monitoring Data"),
   tags$head(
     tags$style(HTML("
-                    .sidebar { height: 90vh; overflow-y: auto; font-size: 14px;}
+                    .sidebar { height: 10vh; overflow-y: auto; font-size: 14px;}
                     " ,
                     "
                     .shiny-output-error-validation {
@@ -637,7 +637,7 @@ server <- function(input, output, session) {
   
   data_blank<-reactive({
     if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
-      pfile2 <-htmlTreeParse("2019_09_25_h091000_KAN_Garmin_2.gpx",error = function (...) {}, useInternalNodes = T)
+      pfile2 <-htmlTreeParse("2019_09_25_h091000_KAN_Garmin_3.gpx",error = function (...) {}, useInternalNodes = T)
       elevations <- as.numeric(xpathSApply(pfile2, path = "//trkpt/ele", xmlValue))
       times <- xpathSApply(pfile2, path = "//trkpt/time", xmlValue)
       coords <- xpathSApply(pfile2, path = "//trkpt", xmlAttrs)

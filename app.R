@@ -81,6 +81,9 @@ ui <- fluidPage(
                                    tags$hr(),
                                    helpText("Add files based on a day's data."),
                                    tags$hr(),
+                                   textInput("timezone", "Timezone of data collection*", value = "", width = NULL,
+                                             placeholder = "eg: UTC; Asia/Kolkata"), 
+                                   tags$hr(),
                                    fileInput("file1",
                                              "Choose Garmin files",
                                              multiple = TRUE,
@@ -126,10 +129,8 @@ ui <- fluidPage(
                                                         ".txt",
                                                         "text/comma-separated-values,text/plain",
                                                         ".csv")),
-                                   
                                    tags$hr(),
-                                   textInput("timezone", "Timezone of data collection", value = "", width = NULL,
-                                             placeholder = "eg: UTC; Asia/Kolkata"), 
+                                   helpText("*mandatory"),
                                    tags$hr(),
                                    actionButton("join_button", "JOIN"),
                                    downloadButton('download',"Download as csv"),
@@ -179,10 +180,6 @@ ui <- fluidPage(
                                        dataTableOutput("table4"),
                                        h5("CPC3007 Notes/Alarms:"),
                                        dataTableOutput("table3")
-                                       # textInput("to", "To:", value="to@gmail.com"),
-                                       # textInput("sub", "Subject:", value="Subject"),
-                                       # textInput("msg","Message:", value="Type your message or concern here!"),
-                                       # actionButton("send", "Send")
                                        )
                   )
                 )
@@ -821,10 +818,6 @@ server <- function(input, output, session) {
     data<-dplyr::select(data, BC,  PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref,RH, Particle_conc,  CO2)
     data[["BC"]]<-as.numeric(as.character(data[["BC"]]))
     data$RH<-data$RH*100
-    # p <- c(0.1, 0.25, 0.5, 0.75, 0.9)
-    # p_names <- map_chr(p, ~paste0(.x*100, "%"))
-    # p_funs <- map(p, ~partial(quantile, probs = .x, na.rm = TRUE)) %>%
-    #   set_names(nm = p_names)
     names(data)<-c("AE51_BC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_Corr (ug/m3)","DT8530_PM2.5_Corr_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
     columns <-c("AE51_BC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_Corr (ug/m3)","DT8530_PM2.5_Corr_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)",  "CPC3007_Particle Conc (#/cm3)", "LI-COR_CO2")
     data[, columns] <- lapply(columns, function(x) as.numeric(as.character(data[[x]])))
@@ -856,7 +849,7 @@ server <- function(input, output, session) {
     tmp$p1<-round(as.numeric(as.character(tmp$p1)), digits = 2)
     tmp$p25<-round(as.numeric(as.character(tmp$p25)), digits = 2)
     tmp
-    
+    tmp<-t(tmp)
   })
   
   output$table4 <- DT::renderDataTable({

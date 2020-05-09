@@ -1457,10 +1457,6 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 
 
-
-# RH
-
-
 # names in map and downloading file
 
 

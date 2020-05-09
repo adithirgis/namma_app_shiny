@@ -1429,7 +1429,7 @@ server <- function(input, output, session) {
       data<-data_joined()
     }
     data$RH<-data$RH*100
-    if (input$palleInp == "BC") {
+    if (input$palleInp == "BC" | input$palleInp == "BC_NR" | input$palleInp == "BC_LC" ) {
       risk.bins =c(0,0.5, 2, 5, 10, 20, 40,100, 500,2000,10000)
       pal =colorBin( "Spectral", bins=risk.bins, na.color = "#808080", reverse=TRUE)
     } else if (input$palleInp == "PM2.5") {

@@ -801,8 +801,8 @@ server <- function(input, output, session) {
       joined_GPS_CO2<-data.table(joined_GPS_CO2)
       setkey(joined_GPS_CO2, date)
       joined_GPS_DT<-left_join(GPS_f, DT_f, by="date")
-      joined_GPS_DT$PM2.5_Corr<-NA
-      joined_GPS_DT<-dplyr::select(joined_GPS_DT, date, PM2.5, PM2.5_Corr,latitude, longitude )
+      joined_GPS_DT$PM2.5_RHC<-NA
+      joined_GPS_DT<-dplyr::select(joined_GPS_DT, date, PM2.5, PM2.5_RHC,latitude, longitude )
       joined_GPS_DT<-data.table(joined_GPS_DT)
       setkey(joined_GPS_DT, date)
       DT_f<-RH_f[joined_GPS_DT, roll = "nearest"]
@@ -810,9 +810,9 @@ server <- function(input, output, session) {
       DT_f<-dplyr::select(DT_f, date,latitude, longitude,  PM2.5, RH )
       names(DT_f) <- c("date","latitude", "longitude",  "PM2.5", "RH")
       DT_f$CF<-sapply(DT_f$RH, FUN = VecFunc)
-      DT_f$PM2.5_Corr<-DT_f$PM2.5/DT_f$CF
+      DT_f$PM2.5_RHC<-DT_f$PM2.5/DT_f$CF
       DT_f$PM2.5_Ref<-(DT_f$PM2.5*1)+0
-      DT_f$PM2.5_Corr_Ref<-(DT_f$PM2.5_Corr*1)+0
+      DT_f$PM2.5_RHC_Ref<-(DT_f$PM2.5_RHC*1)+0
       DT_f$date <- as.POSIXct(DT_f$date, format='%Y-%m-%d %H:%M:%S')
       attributes(DT_f$date )$tzone <-"Asia/Kolkata"
       DT_f<-data.table(DT_f)
@@ -833,8 +833,8 @@ server <- function(input, output, session) {
       setkey(joined_1, date)
       joined<-joined_1[joined_GPS_BC, roll="nearest"]
       joined<-joined %>%
-        dplyr::select(date,latitude,longitude, BC, BC_NR, BC_NR_LC,PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
-      names(joined)<-c("date", "Latitude", "Longitude",  "BC", "BC_NR", "BC_NR_LC","PM2.5","PM2.5_Corr","PM2.5_Corr_Ref", "PM2.5_Ref", "RH", "Particle_conc",  "CO2")
+        dplyr::select(date,latitude,longitude, BC, BC_NR, BC_NR_LC,PM2.5,PM2.5_RHC,PM2.5_RHC_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
+      names(joined)<-c("date", "Latitude", "Longitude",  "BC", "BC_NR", "BC_NR_LC","PM2.5","PM2.5_RHC","PM2.5_RHC_Ref", "PM2.5_Ref", "RH", "Particle_conc",  "CO2")
       attributes(joined$date )$tzone <- "Asia/Kolkata"
       joined<-joined[!duplicated(joined$date), ]
       joined
@@ -876,7 +876,7 @@ server <- function(input, output, session) {
     {
       joined_GPS_DT<-dplyr::select(GPS_f, date,  latitude, longitude)
       joined_GPS_DT$PM2.5<-NA
-      joined_GPS_DT$PM2.5_Corr<-NA
+      joined_GPS_DT$PM2.5_RHC<-NA
       joined_GPS_DT$PM2.5<-as.numeric(joined_GPS_DT$PM2.5)
       
     }
@@ -888,8 +888,8 @@ server <- function(input, output, session) {
         need(try(GPS_f_date()==DT_f_date()), "The files have different date entries in GPS and DustTrak-8530! Please check once again.")
       )
       joined_GPS_DT<-left_join(GPS_f, DT_f, by="date")
-      joined_GPS_DT$PM2.5_Corr<-NA
-      joined_GPS_DT<-dplyr::select(joined_GPS_DT, date, PM2.5, PM2.5_Corr,latitude, longitude )
+      joined_GPS_DT$PM2.5_RHC<-NA
+      joined_GPS_DT<-dplyr::select(joined_GPS_DT, date, PM2.5, PM2.5_RHC,latitude, longitude )
     }
     joined_GPS_DT<-data.table(joined_GPS_DT)
     setkey(joined_GPS_DT, date)
@@ -915,9 +915,9 @@ server <- function(input, output, session) {
     {
       DT_f<-joined_GPS_DT
       DT_f$RH<-NA
-      DT_f$PM2.5_Corr<-NA
+      DT_f$PM2.5_RHC<-NA
       DT_f$PM2.5_Ref<-(DT_f$PM2.5*Slope)+Intercept
-      DT_f$PM2.5_Corr_Ref<-NA
+      DT_f$PM2.5_RHC_Ref<-NA
       DT_f$RH<-as.numeric(DT_f$RH)
     }
     if (!is.null(RH_f()) & !is.null(DT_f()) ){
@@ -930,9 +930,9 @@ server <- function(input, output, session) {
       DT_f<-dplyr::select(DT_f, date,latitude, longitude,  PM2.5, RH )
       names(DT_f) <- c("date","latitude", "longitude",  "PM2.5", "RH")
       DT_f$CF<-sapply(DT_f$RH, FUN = VecFunc)
-      DT_f$PM2.5_Corr<-DT_f$PM2.5/DT_f$CF
+      DT_f$PM2.5_RHC<-DT_f$PM2.5/DT_f$CF
       DT_f$PM2.5_Ref<-(DT_f$PM2.5*Slope)+Intercept
-      DT_f$PM2.5_Corr_Ref<-(DT_f$PM2.5_Corr*Slope)+Intercept
+      DT_f$PM2.5_RHC_Ref<-(DT_f$PM2.5_RHC*Slope)+Intercept
     }
     DT_f$date <- as.POSIXct(DT_f$date, format='%Y-%m-%d %H:%M:%S')
     attributes(DT_f$date )$tzone <- input$timezone
@@ -1025,8 +1025,8 @@ server <- function(input, output, session) {
     setkey(joined_1, date)
     joined<-joined_1[joined_GPS_BC, roll="nearest"]
     joined<-joined %>%
-      dplyr::select(date,latitude,longitude, BC, BC_NR, BC_NR_LC,PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
-    names(joined)<-c("date", "Latitude", "Longitude",  "BC", "BC_NR", "BC_NR_LC","PM2.5","PM2.5_Corr","PM2.5_Corr_Ref", "PM2.5_Ref", "RH", "Particle_conc",  "CO2")
+      dplyr::select(date,latitude,longitude, BC, BC_NR, BC_NR_LC,PM2.5,PM2.5_RHC,PM2.5_RHC_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
+    names(joined)<-c("date", "Latitude", "Longitude",  "BC", "BC_NR", "BC_NR_LC","PM2.5","PM2.5_RHC","PM2.5_RHC_Ref", "PM2.5_Ref", "RH", "Particle_conc",  "CO2")
     attributes(joined$date )$tzone <- input$timezone
     joined<-joined[!duplicated(joined$date), ]
     return(joined)
@@ -1042,9 +1042,9 @@ server <- function(input, output, session) {
     data_joined$BC_NR<-round(as.numeric(data_joined$BC_NR), digits = 2)
     data_joined$BC_NR_LC<-round(as.numeric(data_joined$BC_NR_LC), digits = 2)
     data_joined$PM2.5<-round(as.numeric(data_joined$PM2.5), digits = 2)
-    data_joined$PM2.5_Corr<-round(as.numeric(data_joined$PM2.5_Corr), digits = 2)
+    data_joined$PM2.5_RHC<-round(as.numeric(data_joined$PM2.5_RHC), digits = 2)
     data_joined$PM2.5_Ref<-round(as.numeric(data_joined$PM2.5_Ref), digits = 2)
-    data_joined$PM2.5_Corr_Ref<-round(as.numeric(data_joined$PM2.5_Corr_Ref), digits = 2)
+    data_joined$PM2.5_RHC_Ref<-round(as.numeric(data_joined$PM2.5_RHC_Ref), digits = 2)
     data_joined$Longitude<-round(as.numeric(data_joined$Longitude), digits = 4)
     data_joined$Latitude<-round(as.numeric(data_joined$Latitude), digits = 4)
     data_joined$Particle_conc<-round(as.numeric(data_joined$Particle_conc), digits = 2)
@@ -1052,8 +1052,8 @@ server <- function(input, output, session) {
     data_joined$RH<-data_joined$RH*100
     data_joined$RH<-round(as.numeric(data_joined$RH), digits = 2)
     data_joined<-data_joined %>%
-      dplyr::select(date,Latitude,Longitude, BC,BC_NR,BC_NR_LC, PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
-    names(data_joined)<-c("date", "Latitude", "Longitude",  "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_Corr (ug/m3)","DT8530_PM2.5_Corr_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
+      dplyr::select(date,Latitude,Longitude, BC,BC_NR,BC_NR_LC, PM2.5,PM2.5_RHC,PM2.5_RHC_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
+    names(data_joined)<-c("date", "Latitude", "Longitude",  "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
     data_joined
   })
   
@@ -1071,13 +1071,13 @@ server <- function(input, output, session) {
       data<-data_joined()
     }
     
-    data<-dplyr::select(data, BC,BC_NR,BC_NR_LC,  PM2.5,PM2.5_Corr,PM2.5_Corr_Ref,PM2.5_Ref,RH, Particle_conc,  CO2)
+    data<-dplyr::select(data, BC,BC_NR,BC_NR_LC,  PM2.5,PM2.5_RHC,PM2.5_RHC_Ref,PM2.5_Ref,RH, Particle_conc,  CO2)
     data[["BC"]]<-as.numeric(as.character(data[["BC"]]))
     data[["BC_NR"]]<-as.numeric(as.character(data[["BC_NR"]]))
     data[["BC_NR_LC"]]<-as.numeric(as.character(data[["BC_NR_LC"]]))
     data$RH<-data$RH*100
-    names(data)<-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_Corr (ug/m3)","DT8530_PM2.5_Corr_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
-    columns <-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_Corr (ug/m3)","DT8530_PM2.5_Corr_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)",  "CPC3007_Particle Conc (#/cm3)", "LI-COR_CO2")
+    names(data)<-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
+    columns <-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)",  "CPC3007_Particle Conc (#/cm3)", "LI-COR_CO2")
     data[, columns] <- lapply(columns, function(x) as.numeric(as.character(data[[x]])))
     tmp1 <- do.call(data.frame,
                     list(Mean = apply(data, 2, mean,na.rm=TRUE),
@@ -1288,9 +1288,8 @@ server <- function(input, output, session) {
     if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
       data<-data_blank()
       data$BC_NR_LC<-as.numeric(as.character(data$BC_NR_LC))
-      data$log_BC<-log10(data$BC_NR_LC)
       point <- format_format(big.mark = "", decimal.mark = ",", scientific = FALSE)
-      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(log_BC)))+ geom_line(size=0.6, color="dodgerblue2")+
+      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(BC_NR_LC)))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="AE51_BC_NR_LC (ug/m3)",
                       y="",
                       x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
@@ -1300,9 +1299,8 @@ server <- function(input, output, session) {
     else if(!is.null(BC_f() )){
       data <- data_joined()
       data$BC_NR_LC<-as.numeric(as.character(data$BC_NR_LC))
-      data$log_BC<-log10(data$BC_NR_LC)
       point <- format_format(big.mark = "", decimal.mark = ",", scientific = FALSE)
-      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(log_BC)))+ geom_line(size=0.6, color="dodgerblue2")+
+      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(BC_NR_LC)))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="AE51_BC_NR_LC (ug/m3)",
                       y="",
                       x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
@@ -1312,9 +1310,8 @@ server <- function(input, output, session) {
   output$plot3 <- renderPlotly({
     if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
       data<-data_blank()
-      data$Particle_conc<-as.numeric(data$Particle_conc)
-      data$log_Particle_conc<-log10(data$Particle_conc)
-      ggplotly(ggplot(data, aes(as.POSIXct(date), log_Particle_conc))+ geom_line(size=0.6, color="dodgerblue2")+
+      data$Particle_conc<-as.numeric(as.character(data$Particle_conc))
+      ggplotly(ggplot(data, aes(as.POSIXct(date), Particle_conc))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="CPC3007_Particle Conc (#/cm3)",
                       y="",
                       x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
@@ -1323,9 +1320,8 @@ server <- function(input, output, session) {
     else if(is.null(CPC_f() )) {}
     else if(!is.null(CPC_f() )){
       data <- data_joined()
-      data$Particle_conc<-as.numeric(data$Particle_conc)
-      data$log_Particle_conc<-log10(data$Particle_conc)
-      ggplotly(ggplot(data, aes(as.POSIXct(date), log_Particle_conc))+ geom_line(size=0.6, color="dodgerblue2")+
+      data$Particle_conc<-as.numeric(as.character(data$Particle_conc))
+      ggplotly(ggplot(data, aes(as.POSIXct(date), Particle_conc))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="CPC3007_Particle Conc (#/cm3)",
                       y="",
                       x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
@@ -1338,7 +1334,7 @@ server <- function(input, output, session) {
       ggplotly(ggplot(data, aes(as.POSIXct(date), CO2))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="LI-COR_CO2",
                       y="",
-                      x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_log10(labels =scales::comma_format(digits = 0))+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
+                      x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
       )}
     else if(is.null(CO2_f() )) {}
@@ -1347,7 +1343,7 @@ server <- function(input, output, session) {
       ggplotly(ggplot(data, aes(as.POSIXct(date), CO2))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="LI-COR_CO2",
                       y="",
-                      x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_log10(labels =scales::comma_format(digits = 0))+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
+                      x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
       )}
   })
@@ -1358,8 +1354,8 @@ server <- function(input, output, session) {
       data_joined$date<-NULL
       data_joined$Latitude<-NULL
       data_joined$Longitude<-NULL
-      data_joined$PM2.5_Corr<-NULL
-      data_joined$PM2.5_Corr_Ref<-NULL
+      data_joined$PM2.5_RHC<-NULL
+      data_joined$PM2.5_RHC_Ref<-NULL
     }
     else{
       data_joined<-data_joined()
@@ -1380,15 +1376,15 @@ server <- function(input, output, session) {
       }
       if(is.null(DT_f() )) {
         data_joined$PM2.5<-NULL
-        data_joined$PM2.5_Corr<-NULL
-        data_joined$PM2.5_Corr_Ref<-NULL
+        data_joined$PM2.5_RHC<-NULL
+        data_joined$PM2.5_RHC_Ref<-NULL
         data_joined$PM2.5_Ref<-NULL
         
       }
       if(!is.null(DT_f() )){
         data_joined$PM2.5<-data_joined$PM2.5
-        data_joined$PM2.5_Corr<-data_joined$PM2.5_Corr
-        data_joined$PM2.5_Corr_Ref<-data_joined$PM2.5_Corr_Ref
+        data_joined$PM2.5_RHC<-data_joined$PM2.5_RHC
+        data_joined$PM2.5_RHC_Ref<-data_joined$PM2.5_RHC_Ref
         data_joined$PM2.5_Ref<-data_joined$PM2.5_Ref
       }
       if(is.null(BC_f() )) {

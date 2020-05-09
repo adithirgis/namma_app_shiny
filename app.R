@@ -936,7 +936,7 @@ server <- function(input, output, session) {
       ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(Latitude)))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="Latitude (degree)",
                       y="Latitude",
-                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"))
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
       )}
   })
@@ -947,7 +947,7 @@ server <- function(input, output, session) {
       ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(Longitude)))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="Longitude (degree)",
                       y="Longitude",
-                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"))
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
       )}
   })
@@ -964,7 +964,7 @@ server <- function(input, output, session) {
       ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(log_PM2.5)))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="DT8530_PM2.5 (ug/m3)",
                       y="log10[DT8530_PM2.5 (ug/m3)]",
-                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"))
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
       )}
   })
@@ -977,7 +977,7 @@ server <- function(input, output, session) {
       ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(RH)))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="Relative Humidity (%)",
                       y="Relative Humidity(%)",
-                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous(limits = c(20,100))+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"))
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous(limits = c(20,100))+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
       )}
   })
@@ -992,7 +992,7 @@ server <- function(input, output, session) {
                  labs(title="AE51_BC (ug/m3)",
                       subtitle = "Mobile Monitoring",
                       y="log10[AE51_BC (ug/m3)]",
-                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"))
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
       )}
   })
@@ -1006,7 +1006,7 @@ server <- function(input, output, session) {
                  labs(title="CPC3007_Particle Conc (#/cm3)",
                       subtitle = "Mobile Monitoring",
                       y="log10[CPC_Particle Conc (#/cm3)]",
-                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"))
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
       )
     }
@@ -1019,24 +1019,12 @@ server <- function(input, output, session) {
                  labs(title="LI-COR_CO2",
                       subtitle = "Mobile Monitoring",
                       y="LI-COR_CO2",
-                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_log10(labels =scales::comma_format(digits = 0))+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"))
+                      x="Time")+scale_x_datetime( date_labels = "%H:%M")+scale_y_log10(labels =scales::comma_format(digits = 0))+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
       )
     }
   })
   
-  observe(
-    {
-      if(is.null(input$send) || input$send==0) return(NULL)
-      Email = compose_email(body = input$msg, header = NULL, footer = NULL, title = NULL)
-      Credentials=create_smtp_creds_key(
-        id = "gmail",
-        provider = "gmail",
-        user = "ilkaq@gmail.com"
-      )
-      
-      smtp_send(email = Email, to = input$to, from ="ilkaq@gmail.com", subject = input$subject, credentials = creds_file("gmail"))
-    })
   observe({
     data_joined<-data_joined()
     data_joined$date<-NULL

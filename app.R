@@ -74,7 +74,7 @@ ui <- fluidPage(
   h1("Explore Mobile Monitoring Data"),
   tags$head(
     tags$style(HTML("
-                    .sidebar { height: 90vh; overflow-y: auto; font-size: 14px;}
+                    .sidebar { height: 10vh; overflow-y: auto; font-size: 14px;}
                     " ,
                     "
                     .shiny-output-error-validation {

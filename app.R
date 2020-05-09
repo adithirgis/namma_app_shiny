@@ -1453,7 +1453,7 @@ server <- function(input, output, session) {
       addProviderTiles(providers$Stamen.TonerLines,
                        options = providerTileOptions(opacity = 0.25)) %>%
       addCircles(data=data, lng=~Longitude, lat=~Latitude, popup=  paste("Date:", data$date, "<br>",
-                                                                         "AE51_BC (ug/m3):", round(as.numeric(data$BC), digits = 2), "<br>",
+                                                                         "AE51_BC_LC (ug/m3):", round(as.numeric(data$BC_LC), digits = 2), "<br>",
                                                                          "DT8530_PM2.5 (ug/m3):",round(as.numeric(data$PM2.5), digits = 2), "<br>",
                                                                          "RH(%):",round(as.numeric(data$RH), digits = 2), "<br>",
                                                                          "CPC3007_Particle Conc (#/cm3):", round(as.numeric(data$Particle_conc,"<br>",

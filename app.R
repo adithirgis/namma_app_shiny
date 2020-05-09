@@ -1244,10 +1244,9 @@ server <- function(input, output, session) {
   output$plot <- renderPlotly({
     if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
       data<-data_blank()
-      data$PM2.5<-as.numeric(data$PM2.5)
-      data$log_PM2.5<-log10(data$PM2.5)
+      data$PM2.5<-as.numeric(as.character(data$PM2.5))
       point <- format_format(big.mark = "", decimal.mark = ",", scientific = FALSE)
-      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(log_PM2.5)))+ geom_line(size=0.6, color="dodgerblue2")+
+      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(PM2.5)))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="DT8530_PM2.5 (ug/m3)",
                       y="",
                       x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
@@ -1256,10 +1255,9 @@ server <- function(input, output, session) {
     else if(is.null(DT_f() )) {}
     else if(!is.null(DT_f() )){
       data <- data_joined()
-      data$PM2.5<-as.numeric(data$PM2.5)
-      data$log_PM2.5<-log10(data$PM2.5)
+      data$PM2.5<-as.numeric(as.character(data$PM2.5))
       point <- format_format(big.mark = "", decimal.mark = ",", scientific = FALSE)
-      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(log_PM2.5)))+ geom_line(size=0.6, color="dodgerblue2")+
+      ggplotly(ggplot(data, aes(as.POSIXct(date), as.numeric(PM2.5)))+ geom_line(size=0.6, color="dodgerblue2")+
                  labs(title="DT8530_PM2.5 (ug/m3)",
                       y="",
                       x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
@@ -1367,6 +1365,7 @@ server <- function(input, output, session) {
       data_joined$date<-NULL
       data_joined$Latitude<-NULL
       data_joined$Longitude<-NULL
+      
       if(is.null(CPC_f() )) {
         data_joined$Particle_conc<-NULL
       }

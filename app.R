@@ -125,6 +125,7 @@ ui <- fluidPage(
                                              accept = c("text/csv",
                                                         "text/comma-separated-values,text/plain",
                                                         ".csv")),
+                                   h6("Reference Correction fro DT8530 - PM2.5"),
                                    numericInput("Slope",
                                                 "Slope",
                                                 value =1.0),

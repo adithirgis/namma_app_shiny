@@ -1128,8 +1128,8 @@ server <- function(input, output, session) {
       DT_f 
     }
     else if(is.null(DT_f() )) {}
-    else{
-      files3 = lapply(inFile$datapath, function(y){
+    else if(!is.null(DT_f() )){
+      files3 = lapply(input$file3$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=",", row.names=NULL, skip=2)
         names(JSON_csv)<-c("Setting", "Value")
         JSON_csv<-JSON_csv[1:11,]
@@ -1151,8 +1151,8 @@ server <- function(input, output, session) {
       CPC_f 
     }
     else if(is.null(CPC_f() )) {}
-    else{
-      files3 = lapply(inFile$datapath, function(y){
+    else if(!is.null(CPC_f() )){
+      files3 = lapply(input$file4$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=",", row.names=NULL, skip=1)
         names(JSON_csv)<-c("Setting", "Value")
         JSON_csv<-JSON_csv[1:13,]
@@ -1167,8 +1167,8 @@ server <- function(input, output, session) {
   output$table2 <- DT::renderDataTable({
     inFile<-input$file2
     if(is.null(BC_f() )) {}
-    else{
-      files3 = lapply(inFile$datapath, function(y){
+    else if(!is.null(BC_f() )){
+      files3 = lapply(input$file2$datapath, function(y){
         JSON_csv_header =read.csv(y, header = FALSE, sep=",", skip = 15, row.names=NULL, stringsAsFactors = FALSE)
         JSON_csv_header<-JSON_csv_header[1,]
         JSON_csv= read.csv(y, skip = 17, header = FALSE, sep =",")
@@ -1196,7 +1196,7 @@ server <- function(input, output, session) {
     }
     else if(is.null(BC_f() )) {"No AE51 files available"}
     else if(!is.null(BC_f() )){
-      files3 = lapply(inFile$datapath, function(y){
+      files3 = lapply(input$file2$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=" ", skip = 1, row.names=NULL)
         JSON_csv<-JSON_csv[1:14, ]
         JSON_csv

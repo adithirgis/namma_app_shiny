@@ -1068,7 +1068,7 @@ server <- function(input, output, session) {
       }
       data_joined<-data_joined %>%
         dplyr::select(date,Latitude,Longitude, BC, BC_NR, BC_NR_LC,PM2.5,PM2.5_RHC,PM2.5_RHC_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
-      names(data_joined)<-c("date", "Latitude", "Longitude", "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
+      names(data_joined)<-c("date(LT)", "Latitude", "Longitude", "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
       write.csv(data_joined, fname)
     }
   )

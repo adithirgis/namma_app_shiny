@@ -106,7 +106,7 @@ ui <- fluidPage(
                                    tags$hr(),
                                    helpText("Choose mobile monitoring files."),
                                    tags$hr(),
-                                   test <- a("Timezone* (list)", href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones", style = "font-size:18px; "),
+                                   test <- a("Timezone* (list)", href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones", style = "font-size:18px; ",target="_blank"),
                                    textInput("timezone", "", value = "", width = NULL,
                                              placeholder = "eg: UTC; Asia/Kolkata"), 
                                    tags$hr(),

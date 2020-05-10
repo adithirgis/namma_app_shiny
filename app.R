@@ -1121,7 +1121,7 @@ server <- function(input, output, session) {
   
   output$table4 <- DT::renderDataTable({
     inFile<-input$file3
-    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+    if(is.null(GPS_f()) & is.null(BC_f()) & is.null(CPC_f()) & is.null(DT_f()) & is.null(RH_f()) & is.null(CO2_f())){
       DT_f<-read.csv("2019_09_25_h091000_KAN_DT809.csv", header=FALSE, sep=",", row.names=NULL, skip=2)
       DT_f<-DT_f[1:11,]
       DT_f<-DT_f[,1:2]
@@ -1129,7 +1129,7 @@ server <- function(input, output, session) {
     }
     else if(is.null(DT_f() )) {}
     else if(!is.null(DT_f() )){
-      files3 = lapply(input$file3$datapath, function(y){
+      files3 = lapply(inFile$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=",", row.names=NULL, skip=2)
         names(JSON_csv)<-c("Setting", "Value")
         JSON_csv<-JSON_csv[1:11,]
@@ -1143,7 +1143,7 @@ server <- function(input, output, session) {
   })
   output$table3<- DT::renderDataTable({
     inFile<-input$file4
-    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+    if(is.null(GPS_f()) & is.null(BC_f()) & is.null(CPC_f()) & is.null(DT_f()) & is.null(RH_f()) & is.null(CO2_f())){
       CPC_f<-read.csv("2019_09_25_h091000_KAN_CPC.csv", header=FALSE, sep=",", row.names=NULL, skip=1)
       names(CPC_f)<-c("Setting", "Value")
       CPC_f<-CPC_f[1:13,]
@@ -1152,7 +1152,7 @@ server <- function(input, output, session) {
     }
     else if(is.null(CPC_f() )) {}
     else if(!is.null(CPC_f() )){
-      files3 = lapply(input$file4$datapath, function(y){
+      files3 = lapply(inFile$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=",", row.names=NULL, skip=1)
         names(JSON_csv)<-c("Setting", "Value")
         JSON_csv<-JSON_csv[1:13,]
@@ -1168,7 +1168,7 @@ server <- function(input, output, session) {
     inFile<-input$file2
     if(is.null(BC_f() )) {}
     else if(!is.null(BC_f() )){
-      files3 = lapply(input$file2$datapath, function(y){
+      files3 = lapply(inFile$datapath, function(y){
         JSON_csv_header =read.csv(y, header = FALSE, sep=",", skip = 15, row.names=NULL, stringsAsFactors = FALSE)
         JSON_csv_header<-JSON_csv_header[1,]
         JSON_csv= read.csv(y, skip = 17, header = FALSE, sep =",")
@@ -1188,7 +1188,7 @@ server <- function(input, output, session) {
   })
   output$table5 <-DT::renderDataTable({
     inFile<-input$file2
-    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+    if(is.null(GPS_f()) & is.null(BC_f()) & is.null(CPC_f()) & is.null(DT_f()) & is.null(RH_f()) & is.null(CO2_f())){
       BC_f<-read.csv("2019_09_25_h091000_KAN_AE12.csv", header=FALSE, sep=" ", skip = 1, row.names=NULL)
       BC_f<-BC_f[1:14, ]
       names(BC_f)<-c("Setting")
@@ -1196,7 +1196,7 @@ server <- function(input, output, session) {
     }
     else if(is.null(BC_f() )) {"No AE51 files available"}
     else if(!is.null(BC_f() )){
-      files3 = lapply(input$file2$datapath, function(y){
+      files3 = lapply(inFile$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=" ", skip = 1, row.names=NULL)
         JSON_csv<-JSON_csv[1:14, ]
         JSON_csv

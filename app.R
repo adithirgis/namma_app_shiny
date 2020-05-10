@@ -81,7 +81,7 @@ ui <- fluidPage(
                                              placeholder = "eg: UTC; Asia/Kolkata"), 
                                    tags$hr(),
                                    fileInput("file1",
-                                             "Garmin files",
+                                             "GPSMAP 64s - gpx files",
                                              multiple = TRUE,
                                              accept=c('.gpx')),
                                    tags$hr(),
@@ -111,7 +111,7 @@ ui <- fluidPage(
                                                         ".csv")),
                                    
                                    tags$hr(),
-                                   fileInput("file4", "CPC3007 -Particle Conc files",
+                                   fileInput("file4", "CPC3007 -Particle Concentration files",
                                              multiple = TRUE,
                                              accept = c("text/csv",
                                                         "text/comma-separated-values,text/plain",
@@ -1024,7 +1024,7 @@ server <- function(input, output, session) {
     data_joined$RH<-round(as.numeric(data_joined$RH), digits = 2)
     data_joined<-data_joined %>%
       dplyr::select(date,Latitude,Longitude, BC,BC_NR,BC_NR_LC, PM2.5,PM2.5_RHC,PM2.5_RHC_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
-    names(data_joined)<-c("date", "Latitude", "Longitude",  "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
+    names(data_joined)<-c("date", "Latitude", "Longitude",  "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Concentration (#/cm3)",  "LI-COR_CO2")
     data_joined
   })
   
@@ -1038,7 +1038,7 @@ server <- function(input, output, session) {
       }
       data_joined<-data_joined %>%
         dplyr::select(date,Latitude,Longitude, BC, BC_NR, BC_NR_LC,PM2.5,PM2.5_RHC,PM2.5_RHC_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
-      names(data_joined)<-c("date(LT)", "Latitude", "Longitude", "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
+      names(data_joined)<-c("date(LT)", "Latitude", "Longitude", "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Concentration (#/cm3)",  "LI-COR_CO2")
       write.csv(data_joined, fname)
     }
   )
@@ -1055,8 +1055,8 @@ server <- function(input, output, session) {
     data[["BC_NR"]]<-as.numeric(as.character(data[["BC_NR"]]))
     data[["BC_NR_LC"]]<-as.numeric(as.character(data[["BC_NR_LC"]]))
     data$RH<-data$RH*100
-    names(data)<-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Conc (#/cm3)",  "LI-COR_CO2")
-    columns <-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)",  "CPC3007_Particle Conc (#/cm3)", "LI-COR_CO2")
+    names(data)<-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Concentration (#/cm3)",  "LI-COR_CO2")
+    columns <-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)",  "CPC3007_Particle Concentration (#/cm3)", "LI-COR_CO2")
     data[, columns] <- lapply(columns, function(x) as.numeric(as.character(data[[x]])))
     tmp1 <- do.call(data.frame,
                     list(Mean = apply(data, 2, mean,na.rm=TRUE),
@@ -1289,7 +1289,7 @@ server <- function(input, output, session) {
       data<-data_blank()
       data$Particle_conc<-as.numeric(as.character(data$Particle_conc))
       ggplotly(ggplot(data, aes(as.POSIXct(date), Particle_conc))+ geom_line(size=0.6, color="dodgerblue2")+
-                 labs(title="CPC3007_Particle Conc (#/cm3)",
+                 labs(title="CPC3007_Particle Concentration (#/cm3)",
                       y="",
                       x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
@@ -1299,7 +1299,7 @@ server <- function(input, output, session) {
       data <- data_joined()
       data$Particle_conc<-as.numeric(as.character(data$Particle_conc))
       ggplotly(ggplot(data, aes(as.POSIXct(date), Particle_conc))+ geom_line(size=0.6, color="dodgerblue2")+
-                 labs(title="CPC3007_Particle Conc (#/cm3)",
+                 labs(title="CPC3007_Particle Concentration (#/cm3)",
                       y="",
                       x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"), panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
@@ -1420,7 +1420,7 @@ server <- function(input, output, session) {
                                                                          "AE51_BC (ug/m3):", round(as.numeric(data$BC), digits = 2), "<br>",
                                                                          "DT8530_PM2.5 (ug/m3):",round(as.numeric(data$PM2.5), digits = 2), "<br>",
                                                                          "RH(%):",round(as.numeric(data$RH), digits = 2), "<br>",
-                                                                         "CPC3007_Particle Conc (#/cm3):", round(as.numeric(data$Particle_conc,"<br>",
+                                                                         "CPC3007_Particle Concentration (#/cm3):", round(as.numeric(data$Particle_conc,"<br>",
                                                                                                                             "CO2:",round(as.numeric(data$CO2), digits = 2)), digits = 2)), weight = 3, radius=8,
                  col = ~pal(data[[input$palleInp]]), stroke = TRUE, fillOpacity = 0.8) %>%
       addLegend("bottomright", pal = pal, values = ~data[[input$palleInp]],  title=paste(input$palleInp))

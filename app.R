@@ -40,36 +40,6 @@ Sys.setenv(JAVA_HOME = "C:/Program Files/Java/jre1.8.0_211/")
 # setwd("D:/Dropbox/APMfull/Codes/GitHub Codes/ILKConsultancy")
 # deployApp()
 
-pfile2 <-htmlTreeParse("test_data/2019_09_25_h091000_KAN_Garmin_3.gpx",error = function (...) {}, useInternalNodes = T)
-elevations <- as.numeric(xpathSApply(pfile2, path = "//trkpt/ele", xmlValue))
-times <- xpathSApply(pfile2, path = "//trkpt/time", xmlValue)
-coords <- xpathSApply(pfile2, path = "//trkpt", xmlAttrs)
-lats <- as.numeric(coords["lat",])
-lons <- as.numeric(coords["lon",])
-GPS_f <- data.frame(latitude = lats, longitude = lons, ele = elevations, time = times)
-
-
-CO2_f<-read.csv("2019_09_25_h091000_KAN_CO2.csv", skip=1, sep=",", header=TRUE, row.names=NULL,stringsAsFactors=FALSE)
-CO2_f<-CO2_f[,1:3]
-names(CO2_f)<-c("Date", "Time", "CO2")
-
-BC_f_header =read.csv("2019_09_25_h091000_KAN_AE12.csv", header = FALSE, sep=",", skip = 15, row.names=NULL, stringsAsFactors = FALSE)
-BC_f_header<-BC_f_header[1,]
-BC_f= read.csv("2019_09_25_h091000_KAN_AE12.csv", skip = 17, header = FALSE, sep =",")
-colnames( BC_f ) <- unlist(BC_f_header)
-
-DT_f<-read.csv("2019_09_25_h091000_KAN_DT809.csv", header=TRUE, sep=",", row.names=NULL, skip=28)
-names(DT_f)<-c("Date","Time", "PM2.5")
-
-CPC_f =read.csv("2019_09_25_h091000_KAN_CPC.csv", header=TRUE, sep=",", row.names=NULL, skip=17,stringsAsFactors=FALSE, fileEncoding="latin1")
-
-RH_f<-data.frame(read.csv("2019_09_25_h091000_KAN_RHUSB.csv", header=TRUE, sep=",",skip=6, row.names=NULL))
-RH_f_Date<-RH_f[,2]
-RH_f_Time<-RH_f[,3]
-RH<-RH_f[ , grepl( "RH" , names( RH_f ) ) ]
-RH_f<-data.frame(RH_f_Date, RH_f_Time, RH)
-names(RH_f)<-c("LogDate", "LogTime", "RH")
-
 ui <- fluidPage(
   h1("Explore Mobile Monitoring Air Pollution Data"),
   tags$head(
@@ -106,7 +76,7 @@ ui <- fluidPage(
                                    tags$hr(),
                                    helpText("Choose mobile monitoring files."),
                                    tags$hr(),
-                                   test <- a("Timezone* (list)", href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones", style = "font-size:18px; ",target="_blank"),
+                                   test <- a("Input Timezone* (list)", href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones", style = "font-size:18px; ",target="_blank"),
                                    textInput("timezone", "", value = "", width = NULL,
                                              placeholder = "eg: UTC; Asia/Kolkata"), 
                                    tags$hr(),
@@ -1121,7 +1091,7 @@ server <- function(input, output, session) {
   
   output$table4 <- DT::renderDataTable({
     inFile<-input$file3
-    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+    if(is.null(GPS_f()) & is.null(BC_f()) & is.null(CPC_f()) & is.null(DT_f()) & is.null(RH_f()) & is.null(CO2_f())){
       DT_f<-read.csv("2019_09_25_h091000_KAN_DT809.csv", header=FALSE, sep=",", row.names=NULL, skip=2)
       DT_f<-DT_f[1:11,]
       DT_f<-DT_f[,1:2]
@@ -1129,7 +1099,7 @@ server <- function(input, output, session) {
     }
     else if(is.null(DT_f() )) {}
     else if(!is.null(DT_f() )){
-      files3 = lapply(input$file3$datapath, function(y){
+      files3 = lapply(inFile$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=",", row.names=NULL, skip=2)
         names(JSON_csv)<-c("Setting", "Value")
         JSON_csv<-JSON_csv[1:11,]
@@ -1143,7 +1113,7 @@ server <- function(input, output, session) {
   })
   output$table3<- DT::renderDataTable({
     inFile<-input$file4
-    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+    if(is.null(GPS_f()) & is.null(BC_f()) & is.null(CPC_f()) & is.null(DT_f()) & is.null(RH_f()) & is.null(CO2_f())){
       CPC_f<-read.csv("2019_09_25_h091000_KAN_CPC.csv", header=FALSE, sep=",", row.names=NULL, skip=1)
       names(CPC_f)<-c("Setting", "Value")
       CPC_f<-CPC_f[1:13,]
@@ -1152,7 +1122,7 @@ server <- function(input, output, session) {
     }
     else if(is.null(CPC_f() )) {}
     else if(!is.null(CPC_f() )){
-      files3 = lapply(input$file4$datapath, function(y){
+      files3 = lapply(inFile$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=",", row.names=NULL, skip=1)
         names(JSON_csv)<-c("Setting", "Value")
         JSON_csv<-JSON_csv[1:13,]
@@ -1168,7 +1138,7 @@ server <- function(input, output, session) {
     inFile<-input$file2
     if(is.null(BC_f() )) {}
     else if(!is.null(BC_f() )){
-      files3 = lapply(input$file2$datapath, function(y){
+      files3 = lapply(inFile$datapath, function(y){
         JSON_csv_header =read.csv(y, header = FALSE, sep=",", skip = 15, row.names=NULL, stringsAsFactors = FALSE)
         JSON_csv_header<-JSON_csv_header[1,]
         JSON_csv= read.csv(y, skip = 17, header = FALSE, sep =",")
@@ -1188,7 +1158,7 @@ server <- function(input, output, session) {
   })
   output$table5 <-DT::renderDataTable({
     inFile<-input$file2
-    if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
+    if(is.null(GPS_f()) & is.null(BC_f()) & is.null(CPC_f()) & is.null(DT_f()) & is.null(RH_f()) & is.null(CO2_f())){
       BC_f<-read.csv("2019_09_25_h091000_KAN_AE12.csv", header=FALSE, sep=" ", skip = 1, row.names=NULL)
       BC_f<-BC_f[1:14, ]
       names(BC_f)<-c("Setting")
@@ -1196,7 +1166,7 @@ server <- function(input, output, session) {
     }
     else if(is.null(BC_f() )) {"No AE51 files available"}
     else if(!is.null(BC_f() )){
-      files3 = lapply(input$file2$datapath, function(y){
+      files3 = lapply(inFile$datapath, function(y){
         JSON_csv =read.csv(y, header=FALSE, sep=" ", skip = 1, row.names=NULL)
         JSON_csv<-JSON_csv[1:14, ]
         JSON_csv
@@ -1460,6 +1430,6 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 
 
-# names in map and downloading file
+
 
 

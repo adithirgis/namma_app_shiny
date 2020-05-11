@@ -76,12 +76,12 @@ ui <- fluidPage(
                                    tags$hr(),
                                    helpText("Choose mobile monitoring files."),
                                    tags$hr(),
-                                   test <- a("Input Timezone* (list)", href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones", style = "font-size:18px; ",target="_blank"),
+                                   test <- a("Input Timezone* (link to supported timezones)", href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones", style = "font-size:14px; ",target="_blank"),
                                    textInput("timezone", "", value = "", width = NULL,
                                              placeholder = "eg: UTC; Asia/Kolkata"), 
                                    tags$hr(),
                                    fileInput("file1",
-                                             "GPSMAP 64s - gpx files",
+                                             "GPSMAP 64s - location files",
                                              multiple = TRUE,
                                              accept=c('.gpx')),
                                    tags$hr(),
@@ -135,7 +135,7 @@ ui <- fluidPage(
                   
                 ),
                 mainPanel(
-                  tags$a(img(src='logo.png', align = "right", height=70,width=120), href="https://www.ilkconsultancy.com/"),
+                  tags$a(img(src='logo.png', align = "right", height=70,width=120), href="https://www.ilkconsultancy.com/",target="_blank"),
                   tags$head(
                     tags$style(type='text/css',
                                ".nav-tabs {font-size: 18px} ")),

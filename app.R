@@ -53,7 +53,7 @@ ui <- fluidPage(
                     "
     )) ),
   sidebarLayout(position = "left",
-                sidebarPanel(width=2, 
+                sidebarPanel(width=3, 
                   conditionalPanel(condition = "input.tabs1==6",
                                    tags$hr(),
                                    h4("Alarms! Check for any malfunction."),
@@ -129,6 +129,7 @@ ui <- fluidPage(
                                    helpText("*mandatory"),
                                    tags$hr(),
                                    actionButton("join_button", "JOIN"),
+                                   tags$hr(),
                                    downloadButton('download',"Download as csv"),
                                    
                                    tags$hr())

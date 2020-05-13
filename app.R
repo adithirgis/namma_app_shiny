@@ -136,7 +136,7 @@ ui <- fluidPage(
                   
                 ),
                 mainPanel(
-                  tags$a(img(src='logo.png', align = "right", height=70,width=120), href="https://www.ilkconsultancy.com/",target="_blank"),
+                  tags$a(img(src='logo.png', align = "right", height=70,width=120), href="https://www.ilklabs.com/",target="_blank"),
                   tags$head(
                     tags$style(type='text/css',
                                ".nav-tabs {font-size: 18px} ")),
@@ -1025,7 +1025,7 @@ server <- function(input, output, session) {
     data_joined$RH<-round(as.numeric(data_joined$RH), digits = 2)
     data_joined<-data_joined %>%
       dplyr::select(date,Latitude,Longitude, BC,BC_NR,BC_NR_LC, PM2.5,PM2.5_RHC,PM2.5_RHC_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
-    names(data_joined)<-c("date", "Latitude", "Longitude",  "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Concentration (#/cm3)",  "LI-COR_CO2")
+    names(data_joined)<-c("date", "Latitude", "Longitude",  "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Concentration (#/cm3)",  "LI-COR_CO2 (ppmv)")
     data_joined
   })
   
@@ -1039,7 +1039,7 @@ server <- function(input, output, session) {
       }
       data_joined<-data_joined %>%
         dplyr::select(date,Latitude,Longitude, BC, BC_NR, BC_NR_LC,PM2.5,PM2.5_RHC,PM2.5_RHC_Ref,PM2.5_Ref, RH, Particle_conc,  CO2)
-      names(data_joined)<-c("date(LT)", "Latitude", "Longitude", "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Concentration (#/cm3)",  "LI-COR_CO2")
+      names(data_joined)<-c("date(LT)", "Latitude", "Longitude", "AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Concentration (#/cm3)",  "LI-COR_CO2 (ppmv)")
       write.csv(data_joined, fname)
     }
   )
@@ -1056,8 +1056,8 @@ server <- function(input, output, session) {
     data[["BC_NR"]]<-as.numeric(as.character(data[["BC_NR"]]))
     data[["BC_NR_LC"]]<-as.numeric(as.character(data[["BC_NR_LC"]]))
     data$RH<-data$RH*100
-    names(data)<-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Concentration (#/cm3)",  "LI-COR_CO2")
-    columns <-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)",  "CPC3007_Particle Concentration (#/cm3)", "LI-COR_CO2")
+    names(data)<-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)", "CPC3007_Particle Concentration (#/cm3)",  "LI-COR_CO2 (ppmv)")
+    columns <-c("AE51_BC (ug/m3)","AE51_BC_NR (ug/m3)","AE51_BC_NR_LC (ug/m3)",  "DT8530_PM2.5 (ug/m3)","DT8530_PM2.5_RHC (ug/m3)","DT8530_PM2.5_RHC_Ref (ug/m3)","DT8530_PM2.5_Ref (ug/m3)","RH(%)",  "CPC3007_Particle Concentration (#/cm3)", "LI-COR_CO2 (ppmv)")
     data[, columns] <- lapply(columns, function(x) as.numeric(as.character(data[[x]])))
     tmp1 <- do.call(data.frame,
                     list(Mean = apply(data, 2, mean,na.rm=TRUE),
@@ -1310,7 +1310,7 @@ server <- function(input, output, session) {
     if(is.null(input$file1) & is.null(input$file2) & is.null(input$file3) & is.null(input$file4) & is.null(input$file5) & is.null(input$file6)){
       data<-data_blank()
       ggplotly(ggplot(data, aes(as.POSIXct(date), CO2))+ geom_line(size=0.6, color="dodgerblue2")+
-                 labs(title="LI-COR_CO2",
+                 labs(title="LI-COR_CO2 (ppmv)",
                       y="",
                       x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
@@ -1319,7 +1319,7 @@ server <- function(input, output, session) {
     else if(!is.null(CO2_f() )){
       data <- data_joined()
       ggplotly(ggplot(data, aes(as.POSIXct(date), CO2))+ geom_line(size=0.6, color="dodgerblue2")+
-                 labs(title="LI-COR_CO2",
+                 labs(title="LI-COR_CO2 (ppmv)",
                       y="",
                       x="")+scale_x_datetime( date_labels = "%H:%M")+scale_y_continuous()+theme_minimal()+theme(legend.text=element_text(size=18),plot.title = element_text(size = 14, face = "bold"), axis.title = element_text(size=14),axis.text = element_text(size = 14, face = "bold"),panel.border = element_rect(colour = "black", fill=NA, size=1.2))
                
